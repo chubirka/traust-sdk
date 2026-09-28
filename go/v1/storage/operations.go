@@ -882,7 +882,7 @@ func (s *sqlStore) projectPQCReadiness(ctx context.Context, conn *sql.Conn, stat
 		flags:             flags,
 		provenanceSummary: provenanceSummary,
 		clockItems:        clockItems,
-		readinessBucket:   value.ReadinessBucket,
+		readinessBucket:   projectionEnum(value.ReadinessBucket),
 		fipsInteraction:   fipsInteraction,
 		runtimeEvidence:   runtimeEvidence,
 		serverSideCaveats: serverSideCaveats,
@@ -1149,7 +1149,7 @@ func (s *sqlStore) projectSlaPolicy(ctx context.Context, conn *sql.Conn, state w
 		policyName:      value.PolicyName,
 		source:          source,
 		severityMapping: severityMapping,
-		clockStart:      value.ClockStart,
+		clockStart:      projectionEnum(value.ClockStart),
 		profiles:        profiles,
 	}); err != nil {
 		return projectionError(projectionSlaPolicy, projectionFieldRow, err)

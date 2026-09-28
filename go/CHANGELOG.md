@@ -2,6 +2,25 @@
 
 All notable changes to the Go SDK are documented here.
 
+## [0.14.2]
+
+### Fixed
+
+- **Enum codegen no longer emits invalid Go for registry values that are not
+  identifier-safe.** A value such as `source+runtime` produced
+  `...Source+runtime` and aborted generation. Characters that cannot appear in
+  a Go identifier now act as word separators (`...SourceRuntime`), and two
+  values in one enum that map to the same constant name are a generation error
+  instead of a silent redeclaration. Values that were already identifier-safe
+  generate the same constant names as before.
+- **Storage projections compile whether or not an enum field is retyped.** The
+  type generator retypes a schema enum field to its `enums.*` registry type when
+  a registry file matches its values, and leaves it `string` otherwise. Generated
+  projectors and the report finding projector now pass enum fields through
+  `projectionEnum` (nullable) or `string(...)`, which accept both forms. So a
+  contracts release that registers more enums does not break the storage
+  package on regeneration.
+
 ## [0.14.1]
 
 ### Fixed

@@ -24,9 +24,11 @@ func (s *sqlStore) projectReportFindings(ctx context.Context, conn *sql.Conn, st
 			validationStatus: projectionEnum(finding.ValidationStatus),
 			description:      &finding.Description, remediation: &finding.Remediation,
 			category: finding.Category, attackPattern: finding.AttackPattern,
-			effectiveSeverity: projectionEnum(finding.EffectiveSeverity), origin: finding.Origin,
-			remediationEffort: finding.RemediationEffort, pqcClassification: finding.PqcClassification,
-			fingerprintAlgo: finding.FingerprintAlgo, isolationBoundary: finding.IsolationBoundary,
+			effectiveSeverity: projectionEnum(finding.EffectiveSeverity),
+			origin:            projectionEnum(finding.Origin),
+			remediationEffort: projectionEnum(finding.RemediationEffort),
+			pqcClassification: projectionEnum(finding.PqcClassification),
+			fingerprintAlgo:   finding.FingerprintAlgo, isolationBoundary: finding.IsolationBoundary,
 		}
 		var override any
 		if disposition := finding.Disposition; disposition != nil {
