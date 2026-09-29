@@ -783,8 +783,19 @@ func generateOneRowProjector(
 				expression = "int64(value." + toPascalCase(column.name) + ")"
 			case "JSONB":
 			default:
-				if schemaFile.Properties[column.name].Const == nil {
+				property := schemaFile.Properties[column.name]
+				if property.Const == nil {
 					expression = "value." + toPascalCase(column.name)
+					if isEnumProperty(property) {
+						// The type generator retypes an enum field to its registry
+						// type (enums.*) when one matches and leaves it string
+						// otherwise; both conversions accept either form.
+						if column.nullable {
+							expression = "projectionEnum(" + expression + ")"
+						} else {
+							expression = "string(" + expression + ")"
+						}
+					}
 				}
 			}
 		}
@@ -843,4 +854,16 @@ func storagePascal(s string) string {
 	name = strings.ReplaceAll(name, "Adr", "ADR")
 	name = strings.ReplaceAll(name, "Pqc", "PQC")
 	return name
+}
+
+// isEnumProperty reports whether a projected root property is a string enum,
+// directly or through its resolved $ref.
+func isEnumProperty(node *SchemaNode) bool {
+	if node == nil {
+		return false
+	}
+	if len(node.Enum) > 0 {
+		return true
+	}
+	return node.ResolvedRef != nil && len(node.ResolvedRef.Enum) > 0
 }
