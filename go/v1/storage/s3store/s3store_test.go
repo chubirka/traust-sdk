@@ -18,6 +18,7 @@ func TestNewValidatesConfig(t *testing.T) {
 		"unknown encryption":         {Config{Bucket: "b", Region: "us-east-1", Encryption: "rot13"}, "unknown encryption"},
 		"custom endpoint, no region": {Config{Bucket: "b", Endpoint: "minio.local:9000"}, ""},
 		"sse-s3":                     {Config{Bucket: "b", Region: "us-east-1", Encryption: EncryptionS3}, ""},
+		"bucket-default":             {Config{Bucket: "b", Region: "us-east-1", Encryption: EncryptionBucketDefault}, ""},
 		"sse-kms":                    {Config{Bucket: "b", Region: "us-east-1", Encryption: EncryptionKMS, KMSKeyID: "arn:aws:kms:us-east-1:111122223333:key/abc"}, ""},
 	}
 	for name, tc := range cases {
