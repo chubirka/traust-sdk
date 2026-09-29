@@ -21,12 +21,14 @@ import (
 	"github.com/traust-security/traust-sdk/go/v1/storage"
 )
 
-// Encryption selects server-side encryption for written objects.
+// Encryption selects server-side encryption for written objects. The values
+// are the encryption.mode values of the object-store config contract.
 type Encryption string
 
 const (
 	// EncryptionBucketDefault leaves encryption to the bucket's default policy.
-	EncryptionBucketDefault Encryption = ""
+	// The empty string means the same.
+	EncryptionBucketDefault Encryption = "bucket-default"
 	// EncryptionS3 requests SSE-S3 (keys managed by the object store).
 	EncryptionS3 Encryption = "sse-s3"
 	// EncryptionKMS requests SSE-KMS with Config.KMSKeyID.
@@ -83,7 +85,7 @@ func New(cfg Config) (*Store, error) {
 	}
 	var sse encrypt.ServerSide
 	switch cfg.Encryption {
-	case EncryptionBucketDefault:
+	case EncryptionBucketDefault, "":
 	case EncryptionS3:
 		sse = encrypt.NewSSE()
 	case EncryptionKMS:
