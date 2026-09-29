@@ -1,4 +1,4 @@
-// Code generated from traust-contracts bfd089d4336ae2588b486d494a84a9f68419d5ab. DO NOT EDIT.
+// Code generated from traust-contracts 65b16f8c72159970a3aec15121601739f59867b9. DO NOT EDIT.
 
 package storage
 
@@ -894,6 +894,41 @@ func (s *sqlStore) projectPQCReadiness(ctx context.Context, conn *sql.Conn, stat
 	return nil
 }
 
+type SaveRefutedRegisterInput struct {
+	Binding  Binding
+	Artifact types.Artifact[types.RefutedRegister]
+}
+
+func (c *Client) SaveRefutedRegister(ctx context.Context, input SaveRefutedRegisterInput) (SaveResult, error) {
+	return saveTypedArtifact(ctx, c.store, "refuted-register", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectRefutedRegister)
+}
+
+func (c *Client) GetRefutedRegister(ctx context.Context, bindingID string) (types.Artifact[types.RefutedRegister], error) {
+	return getTypedArtifact(ctx, c.store, "refuted-register", bindingID, types.ParseRefutedRegisterArtifact)
+}
+
+func (s *sqlStore) projectRefutedRegister(ctx context.Context, conn *sql.Conn, state writeState, value types.RefutedRegister) error {
+	sources, err := optionalProjectionJSON(value.Sources)
+	if err != nil {
+		return projectionError(projectionRefutedRegister, projectionFieldSources, err)
+	}
+	entries, err := projectionJSON(value.Entries)
+	if err != nil {
+		return projectionError(projectionRefutedRegister, projectionFieldEntries, err)
+	}
+	if err := s.queries.refutedRegisterUpsert(ctx, conn, refutedRegisterUpsertParams{
+		bindingId:      state.bindingID,
+		artifactDigest: state.digest,
+		source:         value.Source,
+		sources:        sources,
+		generatedAt:    value.GeneratedAt,
+		entries:        entries,
+	}); err != nil {
+		return projectionError(projectionRefutedRegister, projectionFieldRow, err)
+	}
+	return nil
+}
+
 type SaveRemediationInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.Remediation]
@@ -1447,6 +1482,12 @@ func (c *Client) saveNamed(ctx context.Context, name string, payload []byte, bin
 			return SaveResult{}, wrap(OperationSave, PhaseValidate, err)
 		}
 		return c.SavePQCReadiness(ctx, SavePQCReadinessInput{Binding: binding, Artifact: artifact})
+	case "refuted-register":
+		artifact, err := types.ParseRefutedRegisterArtifact(payload)
+		if err != nil {
+			return SaveResult{}, wrap(OperationSave, PhaseValidate, err)
+		}
+		return c.SaveRefutedRegister(ctx, SaveRefutedRegisterInput{Binding: binding, Artifact: artifact})
 	case "remediation":
 		artifact, err := types.ParseRemediationArtifact(payload)
 		if err != nil {

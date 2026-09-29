@@ -58,7 +58,7 @@ func openPostgresStorage(t *testing.T) (*Client, *sql.DB) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = db.Close() })
-	client, err := NewClient(context.Background(), db)
+	client, err := NewClient(context.Background(), db, WithObjectStore(newMemoryObjects()))
 	if err != nil {
 		t.Fatal(err)
 	}

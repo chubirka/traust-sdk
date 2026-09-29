@@ -1,6 +1,10 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
+
+import (
+	"github.com/traust-security/traust-sdk/go/v1/enums"
+)
 
 type PqcFacts struct {
 	Artifact   interface{}      `json:"artifact"`
@@ -12,23 +16,23 @@ type PqcFacts struct {
 }
 
 type Fact struct {
-	CapabilityHint *string     `json:"capability_hint,omitempty"`
-	Confidence     interface{} `json:"confidence,omitempty"`
-	Detail         string      `json:"detail"`
-	FactId         string      `json:"fact_id"`
-	File           string      `json:"file"`
-	FindingId      interface{} `json:"finding_id,omitempty"`
-	FipsMode       *bool       `json:"fips_mode,omitempty"`
-	Ir8547         FactIr8547  `json:"ir8547"`
-	Line           interface{} `json:"line"`
-	Match          *string     `json:"match,omitempty"`
-	PathClass      string      `json:"path_class"`
-	PqcCapable     *bool       `json:"pqc_capable,omitempty"`
-	ProvenanceHint string      `json:"provenance_hint"`
-	Provider       *string     `json:"provider,omitempty"`
-	Risk           interface{} `json:"risk,omitempty"`
-	RuleId         string      `json:"rule_id"`
-	Severity       interface{} `json:"severity,omitempty"`
+	CapabilityHint *string            `json:"capability_hint,omitempty"`
+	Confidence     interface{}        `json:"confidence,omitempty"`
+	Detail         string             `json:"detail"`
+	FactId         string             `json:"fact_id"`
+	File           string             `json:"file"`
+	FindingId      interface{}        `json:"finding_id,omitempty"`
+	FipsMode       *bool              `json:"fips_mode,omitempty"`
+	Ir8547         FactIr8547         `json:"ir8547"`
+	Line           interface{}        `json:"line"`
+	Match          *string            `json:"match,omitempty"`
+	PathClass      enums.PqcPathClass `json:"path_class"`
+	PqcCapable     *bool              `json:"pqc_capable,omitempty"`
+	ProvenanceHint string             `json:"provenance_hint"`
+	Provider       *string            `json:"provider,omitempty"`
+	Risk           interface{}        `json:"risk,omitempty"`
+	RuleId         string             `json:"rule_id"`
+	Severity       interface{}        `json:"severity,omitempty"`
 }
 
 type FactIr8547 struct {
@@ -46,11 +50,11 @@ type FactIr8547Clock struct {
 }
 
 type PqcFactsCoverage struct {
-	AssessmentBasis           string      `json:"assessment_basis"`
-	NoCryptoDetectedAssertion *string     `json:"no_crypto_detected_assertion,omitempty"`
-	RulesInPack               interface{} `json:"rules_in_pack"`
-	ScannedFiles              interface{} `json:"scanned_files"`
-	SkippedFiles              interface{} `json:"skipped_files"`
+	AssessmentBasis           enums.PqcFactsAssessmentBasis `json:"assessment_basis"`
+	NoCryptoDetectedAssertion *string                       `json:"no_crypto_detected_assertion,omitempty"`
+	RulesInPack               interface{}                   `json:"rules_in_pack"`
+	ScannedFiles              interface{}                   `json:"scanned_files"`
+	SkippedFiles              interface{}                   `json:"skipped_files"`
 }
 
 type PqcFactsStamps struct {

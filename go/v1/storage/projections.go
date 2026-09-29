@@ -100,30 +100,12 @@ func projectionInteger(value any) (*int64, error) {
 	return &integer, nil
 }
 
-func optionalInt(value *int) *int64 {
-	if value == nil {
-		return nil
-	}
-	converted := int64(*value)
-	return &converted
-}
-
 func (s *sqlStore) projectLayer(
 	ctx context.Context,
 	conn *sql.Conn,
 	state writeState,
 	layer types.Layer,
 ) error {
-	if err := s.queries.layerMetadataUpsert(ctx, conn, layerMetadataUpsertParams{
-		bindingId:      state.bindingID,
-		artifactDigest: state.digest,
-		repo:           &layer.Metadata.Repository,
-		createdAt:      &layer.Metadata.Created,
-		merkleRoot:     layer.Metadata.MerkleRoot,
-		merkleEpoch:    optionalInt(layer.Metadata.MerkleEpoch),
-	}); err != nil {
-		return projectionError(projectionLayerMetadata, projectionFieldRow, err)
-	}
 	// The events are the TIME DIMENSION. A Go caller that saves a layer
 	// without them writes the merkle root and silently loses every date the
 	// trend, MTTR and SLA views are computed from.

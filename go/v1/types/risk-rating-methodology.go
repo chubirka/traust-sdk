@@ -1,9 +1,13 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
+import (
+	"github.com/traust-security/traust-sdk/go/v1/enums"
+)
+
 type RiskRatingMethodology struct {
-	Bands              []string                                `json:"bands"`
+	Bands              []enums.RiskRatingBand                  `json:"bands"`
 	BucketThresholds   RiskRatingMethodologyBucketThresholds   `json:"bucket_thresholds"`
 	Documentation      *string                                 `json:"documentation,omitempty"`
 	Fallback           RiskRatingMethodologyFallback           `json:"fallback"`
@@ -24,9 +28,9 @@ type CiaMap struct {
 }
 
 type MatrixRow struct {
-	HIGH   string `json:"HIGH"`
-	LOW    string `json:"LOW"`
-	MEDIUM string `json:"MEDIUM"`
+	HIGH   enums.RiskRatingBand `json:"HIGH"`
+	LOW    enums.RiskRatingBand `json:"LOW"`
+	MEDIUM enums.RiskRatingBand `json:"MEDIUM"`
 }
 
 type RiskRatingMethodologyBucketThresholds struct {

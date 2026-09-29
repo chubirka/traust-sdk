@@ -1,4 +1,4 @@
-// Code generated from traust-contracts bfd089d4336ae2588b486d494a84a9f68419d5ab SQL queries. DO NOT EDIT.
+// Code generated from traust-contracts 65b16f8c72159970a3aec15121601739f59867b9 SQL queries. DO NOT EDIT.
 
 package storage
 
@@ -122,27 +122,12 @@ func (q queries) artifactBindingUpsert(ctx context.Context, conn *sql.Conn, p ar
 	return err
 }
 
-const artifactEvidenceGetPostgres = "SELECT payload\nFROM traust_storage.artifact_evidence\nWHERE digest = $1;"
-const artifactEvidenceGetSQLite = "SELECT payload\nFROM artifact_evidence\nWHERE digest = ?;"
-
-type artifactEvidenceGetParams struct {
-	digest string
-}
-
-func (q queries) artifactEvidenceGet(ctx context.Context, conn *sql.Conn, p artifactEvidenceGetParams) *sql.Row {
-	statement := artifactEvidenceGetSQLite
-	if q.dialect == dialectPostgres {
-		statement = artifactEvidenceGetPostgres
-	}
-	return conn.QueryRowContext(ctx, statement, p.digest)
-}
-
-const artifactEvidenceUpsertPostgres = "INSERT INTO traust_storage.artifact_evidence (\n    digest,\n    payload,\n    first_ingested_at\n)\nVALUES (\n    $1,\n    $2,\n    $3\n)\nON CONFLICT (digest) DO NOTHING;"
-const artifactEvidenceUpsertSQLite = "INSERT INTO artifact_evidence (\n    digest,\n    payload,\n    first_ingested_at\n)\nVALUES (\n    ?,\n    ?,\n    ?\n)\nON CONFLICT (digest) DO NOTHING;"
+const artifactEvidenceUpsertPostgres = "INSERT INTO traust_storage.artifact_evidence (\n    digest,\n    byte_size,\n    first_ingested_at\n)\nVALUES (\n    $1,\n    $2,\n    $3\n)\nON CONFLICT (digest) DO NOTHING;"
+const artifactEvidenceUpsertSQLite = "INSERT INTO artifact_evidence (\n    digest,\n    byte_size,\n    first_ingested_at\n)\nVALUES (\n    ?,\n    ?,\n    ?\n)\nON CONFLICT (digest) DO NOTHING;"
 
 type artifactEvidenceUpsertParams struct {
 	digest          string
-	payload         []byte
+	byteSize        int64
 	firstIngestedAt string
 }
 
@@ -151,7 +136,7 @@ func (q queries) artifactEvidenceUpsert(ctx context.Context, conn *sql.Conn, p a
 	if q.dialect == dialectPostgres {
 		statement = artifactEvidenceUpsertPostgres
 	}
-	_, err := conn.ExecContext(ctx, statement, p.digest, p.payload, p.firstIngestedAt)
+	_, err := conn.ExecContext(ctx, statement, p.digest, p.byteSize, p.firstIngestedAt)
 	return err
 }
 
@@ -673,8 +658,8 @@ func (q queries) isolationReviewUpsert(ctx context.Context, conn *sql.Conn, p is
 	return err
 }
 
-const layerEventUpsertPostgres = "INSERT INTO traust_storage.layer_event (\n    binding_id,\n    artifact_digest,\n    event_id,\n    finding_ref,\n    fingerprint,\n    fingerprint_algo,\n    recorded_at,\n    occurred_at,\n    source_type,\n    source_ref,\n    actor_kind,\n    validity,\n    resolution,\n    evidence_grade,\n    auto_accept_tier,\n    rationale,\n    harness_version,\n    evidence_refs,\n    source_reported_by,\n    severity,\n    embargo,\n    risk_lambda,\n    risk_weights_version,\n    risk_tenancy_profile,\n    risk_profile_source,\n    alias,\n    finding\n)\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26,\n    $27\n)\nON CONFLICT (binding_id, event_id) DO NOTHING;"
-const layerEventUpsertSQLite = "INSERT INTO layer_event (\n    binding_id,\n    artifact_digest,\n    event_id,\n    finding_ref,\n    fingerprint,\n    fingerprint_algo,\n    recorded_at,\n    occurred_at,\n    source_type,\n    source_ref,\n    actor_kind,\n    validity,\n    resolution,\n    evidence_grade,\n    auto_accept_tier,\n    rationale,\n    harness_version,\n    evidence_refs,\n    source_reported_by,\n    severity,\n    embargo,\n    risk_lambda,\n    risk_weights_version,\n    risk_tenancy_profile,\n    risk_profile_source,\n    alias,\n    finding\n)\nVALUES (\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?\n)\nON CONFLICT (binding_id, event_id) DO NOTHING;"
+const layerEventUpsertPostgres = "INSERT INTO traust_storage.layer_event (\n    binding_id,\n    artifact_digest,\n    event_id,\n    finding_ref,\n    fingerprint,\n    fingerprint_algo,\n    recorded_at,\n    occurred_at,\n    source_type,\n    source_ref,\n    actor_kind,\n    validity,\n    resolution,\n    evidence_grade,\n    auto_accept_tier,\n    rationale,\n    harness_version,\n    evidence_refs,\n    source_reported_by,\n    severity,\n    embargo,\n    risk_lambda,\n    risk_weights_version,\n    risk_tenancy_profile,\n    risk_profile_source,\n    alias,\n    finding,\n    restatement\n)\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26,\n    $27,\n    $28\n)\nON CONFLICT (binding_id, event_id) DO NOTHING;"
+const layerEventUpsertSQLite = "INSERT INTO layer_event (\n    binding_id,\n    artifact_digest,\n    event_id,\n    finding_ref,\n    fingerprint,\n    fingerprint_algo,\n    recorded_at,\n    occurred_at,\n    source_type,\n    source_ref,\n    actor_kind,\n    validity,\n    resolution,\n    evidence_grade,\n    auto_accept_tier,\n    rationale,\n    harness_version,\n    evidence_refs,\n    source_reported_by,\n    severity,\n    embargo,\n    risk_lambda,\n    risk_weights_version,\n    risk_tenancy_profile,\n    risk_profile_source,\n    alias,\n    finding,\n    restatement\n)\nVALUES (\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?\n)\nON CONFLICT (binding_id, event_id) DO NOTHING;"
 
 type layerEventUpsertParams struct {
 	bindingId          string
@@ -704,6 +689,7 @@ type layerEventUpsertParams struct {
 	riskProfileSource  *string
 	alias              *string
 	finding            *string
+	restatement        *string
 }
 
 func (q queries) layerEventUpsert(ctx context.Context, conn *sql.Conn, p layerEventUpsertParams) error {
@@ -711,28 +697,7 @@ func (q queries) layerEventUpsert(ctx context.Context, conn *sql.Conn, p layerEv
 	if q.dialect == dialectPostgres {
 		statement = layerEventUpsertPostgres
 	}
-	_, err := conn.ExecContext(ctx, statement, p.bindingId, p.artifactDigest, p.eventId, p.findingRef, p.fingerprint, p.fingerprintAlgo, p.recordedAt, p.occurredAt, p.sourceType, p.sourceRef, p.actorKind, p.validity, p.resolution, p.evidenceGrade, p.autoAcceptTier, p.rationale, p.harnessVersion, p.evidenceRefs, p.sourceReportedBy, p.severity, p.embargo, p.riskLambda, p.riskWeightsVersion, p.riskTenancyProfile, p.riskProfileSource, p.alias, p.finding)
-	return err
-}
-
-const layerMetadataUpsertPostgres = "INSERT INTO traust_storage.layer_metadata (\n    binding_id,\n    artifact_digest,\n    repo,\n    created_at,\n    merkle_root,\n    merkle_epoch\n)\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6\n)\nON CONFLICT (binding_id) DO NOTHING;"
-const layerMetadataUpsertSQLite = "INSERT INTO layer_metadata (\n    binding_id,\n    artifact_digest,\n    repo,\n    created_at,\n    merkle_root,\n    merkle_epoch\n)\nVALUES (\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?\n)\nON CONFLICT (binding_id) DO NOTHING;"
-
-type layerMetadataUpsertParams struct {
-	bindingId      string
-	artifactDigest string
-	repo           *string
-	createdAt      *string
-	merkleRoot     *string
-	merkleEpoch    *int64
-}
-
-func (q queries) layerMetadataUpsert(ctx context.Context, conn *sql.Conn, p layerMetadataUpsertParams) error {
-	statement := layerMetadataUpsertSQLite
-	if q.dialect == dialectPostgres {
-		statement = layerMetadataUpsertPostgres
-	}
-	_, err := conn.ExecContext(ctx, statement, p.bindingId, p.artifactDigest, p.repo, p.createdAt, p.merkleRoot, p.merkleEpoch)
+	_, err := conn.ExecContext(ctx, statement, p.bindingId, p.artifactDigest, p.eventId, p.findingRef, p.fingerprint, p.fingerprintAlgo, p.recordedAt, p.occurredAt, p.sourceType, p.sourceRef, p.actorKind, p.validity, p.resolution, p.evidenceGrade, p.autoAcceptTier, p.rationale, p.harnessVersion, p.evidenceRefs, p.sourceReportedBy, p.severity, p.embargo, p.riskLambda, p.riskWeightsVersion, p.riskTenancyProfile, p.riskProfileSource, p.alias, p.finding, p.restatement)
 	return err
 }
 
@@ -964,6 +929,27 @@ func (q queries) privProfileUpsert(ctx context.Context, conn *sql.Conn, p privPr
 		statement = privProfileUpsertPostgres
 	}
 	_, err := conn.ExecContext(ctx, statement, p.bindingId, p.artifactDigest, p.repo, p.tier, p.workloads, p.rbacRules, p.rbacFlags, p.sccRequests, p.sccsShipped, p.namespaces, p.installModes, p.operatorgroups, p.tier2RequiredVsGranted, p.exampleOrTestManifestsExcluded, p.summary)
+	return err
+}
+
+const refutedRegisterUpsertPostgres = "INSERT INTO traust_storage.refuted_register (\n    binding_id, artifact_digest, source, sources, generated_at, entries\n) VALUES (\n    $1, $2, $3, $4, $5, $6\n)\nON CONFLICT (binding_id) DO NOTHING;"
+const refutedRegisterUpsertSQLite = "INSERT INTO refuted_register (\n    binding_id, artifact_digest, source, sources, generated_at, entries\n) VALUES (\n    ?, ?, ?, ?, ?, ?\n)\nON CONFLICT (binding_id) DO NOTHING;"
+
+type refutedRegisterUpsertParams struct {
+	bindingId      string
+	artifactDigest string
+	source         string
+	sources        *string
+	generatedAt    string
+	entries        string
+}
+
+func (q queries) refutedRegisterUpsert(ctx context.Context, conn *sql.Conn, p refutedRegisterUpsertParams) error {
+	statement := refutedRegisterUpsertSQLite
+	if q.dialect == dialectPostgres {
+		statement = refutedRegisterUpsertPostgres
+	}
+	_, err := conn.ExecContext(ctx, statement, p.bindingId, p.artifactDigest, p.source, p.sources, p.generatedAt, p.entries)
 	return err
 }
 

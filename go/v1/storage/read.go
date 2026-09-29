@@ -97,18 +97,19 @@ func getTypedArtifact[T any](
 	return artifact, nil
 }
 
-func (s *sqlStore) readEvidence(ctx context.Context, conn *sql.Conn, digest string) ([]byte, error) {
-	var payload []byte
-	if err := s.queries.artifactEvidenceGet(
-		ctx,
-		conn,
-		artifactEvidenceGetParams{digest: digest},
-	).Scan(&payload); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+func (s *sqlStore) readEvidence(ctx context.Context, _ *sql.Conn, digest string) ([]byte, error) {
+	if s.objects == nil {
+		return nil, wrap(OperationRead, PhaseRead, ErrNoObjectStore)
+	}
+	payload, err := s.objects.GetArtifact(ctx, digest)
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
 			return nil, wrap(OperationRead, PhaseRead, ErrNotFound)
 		}
 		return nil, wrap(OperationRead, PhaseRead, err)
 	}
+	// The object store is outside the database's integrity guarantees, so the
+	// bytes are checked against the digest they were bound under.
 	if storedDigest, _ := identifyArtifact(payload); storedDigest != digest {
 		return nil, wrap(OperationRead, PhaseRead, ErrEvidenceCorrupt)
 	}

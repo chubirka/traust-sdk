@@ -1,5 +1,5 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
-const ContractsVersion = "0.33.0"
+const ContractsVersion = "0.44.0"

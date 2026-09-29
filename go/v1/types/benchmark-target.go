@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -16,7 +16,7 @@ type BenchmarkTargetTargetsItem struct {
 	Admitted   bool                                     `json:"admitted"`
 	AdmittedAt interface{}                              `json:"admitted_at,omitempty"`
 	AdmittedBy interface{}                              `json:"admitted_by,omitempty"`
-	Embargo    *string                                  `json:"embargo,omitempty"`
+	Embargo    *enums.BenchmarkTargetEmbargo            `json:"embargo,omitempty"`
 	Evidence   *BenchmarkTargetTargetsItemEvidence      `json:"evidence,omitempty"`
 	Expected   []BenchmarkTargetTargetsItemExpectedItem `json:"expected"`
 	FixCommit  interface{}                              `json:"fix_commit,omitempty"`
@@ -26,14 +26,14 @@ type BenchmarkTargetTargetsItem struct {
 	Language   interface{}                              `json:"language,omitempty"`
 	Notes      *string                                  `json:"notes,omitempty"`
 	PreFixSha  interface{}                              `json:"pre_fix_sha,omitempty"`
-	Provenance string                                   `json:"provenance"`
+	Provenance enums.BenchmarkTargetProvenance          `json:"provenance"`
 	RepoUrl    string                                   `json:"repo_url"`
 }
 
 type BenchmarkTargetTargetsItemEvidence struct {
-	Excerpt *string `json:"excerpt,omitempty"`
-	Kind    string  `json:"kind"`
-	Ref     string  `json:"ref"`
+	Excerpt *string                           `json:"excerpt,omitempty"`
+	Kind    enums.BenchmarkTargetEvidenceKind `json:"kind"`
+	Ref     string                            `json:"ref"`
 }
 
 type BenchmarkTargetTargetsItemExpectedItem struct {
@@ -46,6 +46,6 @@ type BenchmarkTargetTargetsItemExpectedItem struct {
 }
 
 type BenchmarkTargetTargetsItemInjection struct {
-	Class  string   `json:"class"`
-	Tokens []string `json:"tokens"`
+	Class  enums.BenchmarkTargetInjectionClass `json:"class"`
+	Tokens []string                            `json:"tokens"`
 }

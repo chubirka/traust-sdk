@@ -1,6 +1,10 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
+
+import (
+	"github.com/traust-security/traust-sdk/go/v1/enums"
+)
 
 type FleetFix struct {
 	Description string              `json:"description"`
@@ -19,15 +23,15 @@ type FleetFixGuards struct {
 }
 
 type FleetFixMatcher struct {
-	ContextRegex  *string  `json:"context_regex,omitempty"`
-	ContextWindow *int     `json:"context_window,omitempty"`
-	FileGlob      []string `json:"file_glob"`
-	Kind          string   `json:"kind"`
-	Lang          *string  `json:"lang,omitempty"`
-	MatchRegex    *string  `json:"match_regex,omitempty"`
-	Pattern       *string  `json:"pattern,omitempty"`
-	UrlRegex      *string  `json:"url_regex,omitempty"`
-	UrlWindow     *int     `json:"url_window,omitempty"`
+	ContextRegex  *string                   `json:"context_regex,omitempty"`
+	ContextWindow *int                      `json:"context_window,omitempty"`
+	FileGlob      []string                  `json:"file_glob"`
+	Kind          enums.FleetFixMatcherKind `json:"kind"`
+	Lang          *string                   `json:"lang,omitempty"`
+	MatchRegex    *string                   `json:"match_regex,omitempty"`
+	Pattern       *string                   `json:"pattern,omitempty"`
+	UrlRegex      *string                   `json:"url_regex,omitempty"`
+	UrlWindow     *int                      `json:"url_window,omitempty"`
 }
 
 type FleetFixResolver struct {

@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -47,14 +47,14 @@ type CloudConfigFindingsCurrentFindingsItem struct {
 	Framework           string                                                `json:"framework"`
 	Id                  string                                                `json:"id"`
 	IsolationBoundary   *string                                               `json:"isolation_boundary,omitempty"`
-	IsolationDimensions []string                                              `json:"isolation_dimensions,omitempty"`
+	IsolationDimensions []enums.IsolationDimension                            `json:"isolation_dimensions,omitempty"`
 	Locations           []CloudConfigFindingsCurrentFindingsItemLocationsItem `json:"locations,omitempty"`
-	Provider            string                                                `json:"provider"`
+	Provider            enums.CloudProvider                                   `json:"provider"`
 	Rationale           *string                                               `json:"rationale,omitempty"`
 	Remediation         interface{}                                           `json:"remediation,omitempty"`
-	ScannerSeverity     *string                                               `json:"scanner_severity,omitempty"`
+	ScannerSeverity     *enums.ScannerSeverity                                `json:"scanner_severity,omitempty"`
 	Severity            enums.Severity                                        `json:"severity"`
-	Status              string                                                `json:"status"`
+	Status              enums.CloudConfigFindingStatus                        `json:"status"`
 	Title               string                                                `json:"title"`
 	ValidationStatus    enums.Validity                                        `json:"validation_status"`
 }

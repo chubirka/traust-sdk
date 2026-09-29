@@ -2,6 +2,42 @@
 
 All notable changes to the Go SDK are documented here.
 
+## [0.15.0]
+
+Draft: open questions for review are listed in the PR.
+
+### Changed
+
+- **Generated against traust-contracts 0.44.0** (was a pre-0.37 commit).
+  - Every registered enum is now a Go type, and matching fields are typed
+    `enums.*` instead of `string`.
+  - `refuted-register` gains Save/Get operations.
+  - The `layer_metadata` projection is gone (contracts #11); the findings
+    summary's repository now comes from subject ownership.
+- **Artifact bytes live in an object store.** storage/v1 records only each
+  artifact's digest and byte size (contracts #9).
+  - `NewClient` accepts options, and `WithObjectStore` supplies an
+    `ObjectStore`.
+  - Save writes the bytes under `sha256/<digest>` before the database
+    transaction, so a committed binding always has its bytes.
+  - The read-back collision check is gone, because the digest is the key.
+  - Typed `Get*` and `GetEvidence` read from the object store and verify the
+    digest.
+  - Without an object store, saves still record the binding, and reads
+    return `ErrNoObjectStore`.
+
+### Added
+
+- `ObjectStore` interface and `ObjectKey` (`<prefix>sha256/<digest>`).
+- `v1/storage/s3store`: an S3-compatible `ObjectStore` (minio-go).
+  - Configured with endpoint, region, bucket, prefix, TLS, SSE-S3 or SSE-KMS,
+    and a read size limit.
+  - Credentials are never in config: they come from the environment (`AWS_*`,
+    then `MINIO_*`), then the workload's IAM role, unless the caller passes a
+    provider.
+  - Includes an opt-in integration test against a real endpoint
+    (`S3STORE_TEST_ENDPOINT`).
+
 ## [0.14.2]
 
 ### Fixed

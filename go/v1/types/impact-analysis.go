@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -37,7 +37,7 @@ type Evidence struct {
 type ImpactAnalysisMetadata struct {
 	AdvisorySources       []string                      `json:"advisory_sources,omitempty"`
 	Cve                   string                        `json:"cve"`
-	Ecosystem             *string                       `json:"ecosystem,omitempty"`
+	Ecosystem             *enums.Ecosystem              `json:"ecosystem,omitempty"`
 	FeatureDescription    interface{}                   `json:"feature_description,omitempty"`
 	FixedVersion          interface{}                   `json:"fixed_version,omitempty"`
 	GeneratedAt           string                        `json:"generated_at"`
@@ -46,7 +46,7 @@ type ImpactAnalysisMetadata struct {
 	Options               ImpactAnalysisMetadataOptions `json:"options"`
 	PortfolioGraphDb      interface{}                   `json:"portfolio_graph_db,omitempty"`
 	PortfolioGraphVersion interface{}                   `json:"portfolio_graph_version,omitempty"`
-	TiersExecuted         []string                      `json:"tiers_executed"`
+	TiersExecuted         []enums.ImpactTier            `json:"tiers_executed"`
 	VulnerablePackages    []string                      `json:"vulnerable_packages,omitempty"`
 	VulnerableRange       string                        `json:"vulnerable_range"`
 	VulnerableSymbols     []string                      `json:"vulnerable_symbols,omitempty"`

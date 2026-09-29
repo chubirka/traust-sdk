@@ -10,6 +10,7 @@ import (
 	"errors"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/traust-security/traust-sdk/go/v1/types"
@@ -24,7 +25,7 @@ func openTestStorage(t *testing.T) *Client {
 	}
 	db.SetMaxOpenConns(1)
 	t.Cleanup(func() { _ = db.Close() })
-	client, err := NewClient(context.Background(), db)
+	client, err := NewClient(context.Background(), db, WithObjectStore(newMemoryObjects()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,6 +34,37 @@ func openTestStorage(t *testing.T) *Client {
 	}
 	return client
 }
+
+// memoryObjects is an in-memory ObjectStore for tests.
+type memoryObjects struct {
+	mu      sync.Mutex
+	objects map[string][]byte
+	putErr  error
+}
+
+func newMemoryObjects() *memoryObjects { return &memoryObjects{objects: map[string][]byte{}} }
+
+func (m *memoryObjects) PutArtifact(_ context.Context, digest string, payload []byte) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.putErr != nil {
+		return m.putErr
+	}
+	m.objects[ObjectKey("", digest)] = append([]byte(nil), payload...)
+	return nil
+}
+
+func (m *memoryObjects) GetArtifact(_ context.Context, digest string) ([]byte, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	payload, ok := m.objects[ObjectKey("", digest)]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return append([]byte(nil), payload...), nil
+}
+
+func objectsOf(client *Client) *memoryObjects { return client.store.objects.(*memoryObjects) }
 
 func sqlDB(client *Client) *sql.DB { return client.store.db }
 
@@ -58,6 +90,7 @@ func bindingFor(name string) Binding {
 		"pqc-blockers",
 		"pqc-facts",
 		"pqc-readiness",
+		"refuted-register",
 		"remediation",
 		"report",
 		"threat-model",
@@ -326,12 +359,9 @@ func TestTypedReadGuardsBindingAndEvidence(t *testing.T) {
 	if _, err := client.GetTriage(ctx, result.BindingID); !errors.Is(err, ErrArtifactTypeMismatch) {
 		t.Fatalf("type mismatch = %v", err)
 	}
-	if _, err := sqlDB(client).Exec(
-		"UPDATE artifact_evidence SET payload = payload || x'20' WHERE digest = ?",
-		result.Digest,
-	); err != nil {
-		t.Fatal(err)
-	}
+	objects := objectsOf(client)
+	key := ObjectKey("", result.Digest)
+	objects.objects[key] = append(objects.objects[key], ' ')
 	if _, err := client.GetEvidence(ctx, result.Digest); !errors.Is(err, ErrEvidenceCorrupt) {
 		t.Fatalf("corruption = %v", err)
 	}
@@ -376,7 +406,7 @@ func TestExplicitSupersessionSelectsCurrentBinding(t *testing.T) {
 	}
 }
 
-func TestFindingsSummaryJoinsSameRunAndLayerDisplay(t *testing.T) {
+func TestFindingsSummaryJoinsSameRunAndOwnershipDisplay(t *testing.T) {
 	ctx := context.Background()
 	client := openTestStorage(t)
 	samples := sampleArtifacts(t)
@@ -393,9 +423,14 @@ func TestFindingsSummaryJoinsSameRunAndLayerDisplay(t *testing.T) {
 	if _, err := client.SaveTriage(ctx, SaveTriageInput{Binding: binding, Artifact: triage}); err != nil {
 		t.Fatal(err)
 	}
-	layer := mustParseArtifact(t, samples["layer"], types.ParseLayerArtifact)
-	if _, err := client.SaveLayer(ctx, SaveLayerInput{
-		Binding: Binding{LayerID: &layerID}, Artifact: layer,
+	// Since contracts 0.37 the display repository comes from subject
+	// ownership (ownership_current.repo_url), not from layer metadata.
+	ownershipPayload := replaceJSONField(t, samples["corpus-registry"], func(document map[string]any) {
+		document["subjects"].([]any)[0].(map[string]any)["subject_id"] = *binding.SubjectID
+	})
+	ownership := mustParseArtifact(t, ownershipPayload, types.ParseCorpusRegistryArtifact)
+	if _, err := client.SaveCorpusRegistry(ctx, SaveCorpusRegistryInput{
+		Binding: Binding{ScopeID: "local"}, Artifact: ownership,
 	}); err != nil {
 		t.Fatal(err)
 	}

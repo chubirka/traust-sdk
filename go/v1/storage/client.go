@@ -27,10 +27,22 @@ type sqlStore struct {
 	db      *sql.DB
 	dialect dialect
 	queries queries
+	objects ObjectStore
+}
+
+// Option configures a Client.
+type Option func(*sqlStore)
+
+// WithObjectStore sets where artifact bytes are kept. storage/v1 stores only
+// each artifact's digest and size, so without an object store saves still
+// succeed but the bytes are not retained, and Get* and GetEvidence return
+// ErrNoObjectStore.
+func WithObjectStore(objects ObjectStore) Option {
+	return func(s *sqlStore) { s.objects = objects }
 }
 
 // NewClient binds storage to a caller-owned database pool.
-func NewClient(ctx context.Context, db *sql.DB) (*Client, error) {
+func NewClient(ctx context.Context, db *sql.DB, options ...Option) (*Client, error) {
 	if db == nil {
 		return nil, wrap(OperationInit, PhaseInput, ErrNilDatabase)
 	}
@@ -44,7 +56,11 @@ func NewClient(ctx context.Context, db *sql.DB) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Client{store: &sqlStore{db: db, dialect: dialect, queries: queries{dialect: dialect}}}, nil
+	store := &sqlStore{db: db, dialect: dialect, queries: queries{dialect: dialect}}
+	for _, option := range options {
+		option(store)
+	}
+	return &Client{store: store}, nil
 }
 
 // Init creates storage in an empty database or verifies its exact revision.
