@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"database/sql"
@@ -58,6 +57,7 @@ func bindingFor(name string) Binding {
 		"pqc-blockers",
 		"pqc-facts",
 		"pqc-readiness",
+		"refuted-register",
 		"remediation",
 		"report",
 		"threat-model",
@@ -183,7 +183,7 @@ func projectionTable(name string) string {
 	}
 }
 
-func TestAllArtifactsRetainEvidenceAndProject(t *testing.T) {
+func TestAllArtifactsRecordEvidenceAndProject(t *testing.T) {
 	ctx := context.Background()
 	client := openTestStorage(t)
 	samples := sampleArtifacts(t)
@@ -192,9 +192,11 @@ func TestAllArtifactsRetainEvidenceAndProject(t *testing.T) {
 		if err != nil {
 			t.Fatalf("save %s: %v", name, err)
 		}
-		evidence, err := client.GetEvidence(ctx, result.Digest)
-		if err != nil || !bytes.Equal(evidence, payload) {
-			t.Fatalf("evidence %s: %v", name, err)
+		var size int64
+		if err := sqlDB(client).QueryRow(
+			"SELECT byte_size FROM artifact_evidence WHERE digest = ?", result.Digest,
+		).Scan(&size); err != nil || size != int64(len(payload)) {
+			t.Fatalf("evidence %s: byte_size = %d (%v), want %d", name, size, err, len(payload))
 		}
 	}
 	for name := range samples {
@@ -220,7 +222,7 @@ func TestAllArtifactsRetainEvidenceAndProject(t *testing.T) {
 	}
 }
 
-func TestSaveAndTypedReadExactEvidence(t *testing.T) {
+func TestSaveRecordsDigestAndBinding(t *testing.T) {
 	ctx := context.Background()
 	client := openTestStorage(t)
 	payload := readFixture(t, "storagetest/testdata/vuln-findings-populated.test.json")
@@ -239,9 +241,8 @@ func TestSaveAndTypedReadExactEvidence(t *testing.T) {
 	if result.Digest != hex.EncodeToString(want[:]) || result.BindingID == "" || result.AlreadyBound {
 		t.Fatalf("result = %+v", result)
 	}
-	stored, err := client.GetVulnFindings(ctx, result.BindingID)
-	if err != nil || !bytes.Equal(stored.Payload(), payload) {
-		t.Fatalf("typed read: %v", err)
+	if _, err := client.GetVulnFindings(ctx, result.BindingID); !errors.Is(err, ErrArtifactBytesNotRetained) {
+		t.Fatalf("typed read = %v, want ErrArtifactBytesNotRetained", err)
 	}
 	record, err := client.GetBinding(ctx, result.BindingID)
 	if err != nil || record.Digest != result.Digest || record.ArtifactName != "vuln-findings" {
@@ -309,7 +310,7 @@ func TestProfilesRequireRunAndLayerContext(t *testing.T) {
 	}
 }
 
-func TestTypedReadGuardsBindingAndEvidence(t *testing.T) {
+func TestTypedReadGuardsBinding(t *testing.T) {
 	ctx := context.Background()
 	client := openTestStorage(t)
 	payload := sampleArtifacts(t)["vuln-findings"]
@@ -326,14 +327,8 @@ func TestTypedReadGuardsBindingAndEvidence(t *testing.T) {
 	if _, err := client.GetTriage(ctx, result.BindingID); !errors.Is(err, ErrArtifactTypeMismatch) {
 		t.Fatalf("type mismatch = %v", err)
 	}
-	if _, err := sqlDB(client).Exec(
-		"UPDATE artifact_evidence SET payload = payload || x'20' WHERE digest = ?",
-		result.Digest,
-	); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := client.GetEvidence(ctx, result.Digest); !errors.Is(err, ErrEvidenceCorrupt) {
-		t.Fatalf("corruption = %v", err)
+	if _, err := client.GetEvidence(ctx, result.Digest); !errors.Is(err, ErrArtifactBytesNotRetained) {
+		t.Fatalf("GetEvidence = %v, want ErrArtifactBytesNotRetained", err)
 	}
 }
 
@@ -376,7 +371,7 @@ func TestExplicitSupersessionSelectsCurrentBinding(t *testing.T) {
 	}
 }
 
-func TestFindingsSummaryJoinsSameRunAndLayerDisplay(t *testing.T) {
+func TestFindingsSummaryJoinsSameRunAndOwnershipDisplay(t *testing.T) {
 	ctx := context.Background()
 	client := openTestStorage(t)
 	samples := sampleArtifacts(t)
@@ -393,9 +388,14 @@ func TestFindingsSummaryJoinsSameRunAndLayerDisplay(t *testing.T) {
 	if _, err := client.SaveTriage(ctx, SaveTriageInput{Binding: binding, Artifact: triage}); err != nil {
 		t.Fatal(err)
 	}
-	layer := mustParseArtifact(t, samples["layer"], types.ParseLayerArtifact)
-	if _, err := client.SaveLayer(ctx, SaveLayerInput{
-		Binding: Binding{LayerID: &layerID}, Artifact: layer,
+	// Since contracts 0.37 the display repository comes from subject
+	// ownership (ownership_current.repo_url), not from layer metadata.
+	ownershipPayload := replaceJSONField(t, samples["corpus-registry"], func(document map[string]any) {
+		document["subjects"].([]any)[0].(map[string]any)["subject_id"] = *binding.SubjectID
+	})
+	ownership := mustParseArtifact(t, ownershipPayload, types.ParseCorpusRegistryArtifact)
+	if _, err := client.SaveCorpusRegistry(ctx, SaveCorpusRegistryInput{
+		Binding: Binding{ScopeID: "local"}, Artifact: ownership,
 	}); err != nil {
 		t.Fatal(err)
 	}

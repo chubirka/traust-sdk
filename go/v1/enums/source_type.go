@@ -2,7 +2,7 @@
 
 package enums
 
-// SourceType — Event source type classifying evidence origin. Evidence classes for validity precedence: validation_report/verification_report/fuzz_report are execution-verified (class 1), human static (class 2), machine static incl. triage_report/impact_report/vuln_scan_report (class 3). rebaseline is NOT an evidence class and never participates in validity precedence: it records that a finding was RENAMED, so the alias lives in the Merkle-covered event stream rather than in mutable metadata.Every one of them carries an EMPTY disposition, which is the invariant a consumer should rely on -- a rebaseline event asserts nothing about whether a finding is real.
+// SourceType — Event source type classifying evidence origin. Evidence classes for validity precedence: validation_report/verification_report/fuzz_report are execution-verified (class 1), human static (class 2), machine static incl. triage_report/impact_report/vuln_scan_report (class 3). rebaseline is NOT an evidence class and never participates in validity precedence: it records that a finding was RENAMED, so the alias lives in the Merkle-covered event stream rather than in mutable metadata.Every one of them carries an EMPTY disposition, which is the invariant a consumer should rely on -- a rebaseline event asserts nothing about whether a finding is real. restatement is NOT an evidence class either: it records that DATA was wrong -- a claim hash, a report digest, an artifact digest map, or a field on a prior event -- and carries an empty disposition plus a `restatement` block.
 type SourceType string
 
 const (
@@ -17,6 +17,7 @@ const (
 	SourceTypeVulnScanReport     SourceType = "vuln_scan_report"
 	SourceTypeFuzzReport         SourceType = "fuzz_report"
 	SourceTypeRebaseline         SourceType = "rebaseline"
+	SourceTypeRestatement        SourceType = "restatement"
 )
 
 // SourceTypeValues returns all valid SourceType values.
@@ -33,5 +34,6 @@ func SourceTypeValues() []SourceType {
 		SourceTypeVulnScanReport,
 		SourceTypeFuzzReport,
 		SourceTypeRebaseline,
+		SourceTypeRestatement,
 	}
 }

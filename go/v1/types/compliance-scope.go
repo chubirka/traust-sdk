@@ -1,6 +1,10 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
+
+import (
+	"github.com/traust-security/traust-sdk/go/v1/enums"
+)
 
 type ComplianceScope struct {
 	Boundaries map[string]ComplianceScopeBoundariesEntry `json:"boundaries"`
@@ -13,11 +17,11 @@ type ComplianceScopeBoundariesEntry struct {
 	DeclaredBy         string                                            `json:"declared_by"`
 	DeploymentEvidence *ComplianceScopeBoundariesEntryDeploymentEvidence `json:"deployment_evidence,omitempty"`
 	Exclude            []ComplianceScopeBoundariesEntryExcludeItem       `json:"exclude,omitempty"`
-	Frameworks         []string                                          `json:"frameworks"`
+	Frameworks         []enums.ComplianceFramework                       `json:"frameworks"`
 	Include            []ComplianceScopeBoundariesEntryIncludeItem       `json:"include,omitempty"`
 	Notes              *string                                           `json:"notes,omitempty"`
 	Product            *string                                           `json:"product,omitempty"`
-	ResolvesVia        string                                            `json:"resolves_via"`
+	ResolvesVia        enums.ComplianceScopeResolvesVia                  `json:"resolves_via"`
 }
 
 type ComplianceScopeBoundariesEntryDeploymentEvidence struct {

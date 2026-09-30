@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -254,6 +254,18 @@ func EncodePqcReadinessArtifact(value PqcReadiness) (Artifact[PqcReadiness], err
 		return Artifact[PqcReadiness]{}, err
 	}
 	return ParsePqcReadinessArtifact(payload)
+}
+
+func ParseRefutedRegisterArtifact(payload []byte) (Artifact[RefutedRegister], error) {
+	return ParseArtifact[RefutedRegister]("refuted-register", payload)
+}
+
+func EncodeRefutedRegisterArtifact(value RefutedRegister) (Artifact[RefutedRegister], error) {
+	payload, err := json.Marshal(value)
+	if err != nil {
+		return Artifact[RefutedRegister]{}, err
+	}
+	return ParseRefutedRegisterArtifact(payload)
 }
 
 func ParseRemediationArtifact(payload []byte) (Artifact[Remediation], error) {

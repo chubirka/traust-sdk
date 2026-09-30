@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -20,10 +20,10 @@ type Verification struct {
 }
 
 type CrossRepo struct {
-	FixRef              interface{} `json:"fix_ref,omitempty"`
-	FixRepo             string      `json:"fix_repo"`
-	Propagation         string      `json:"propagation"`
-	PropagationEvidence interface{} `json:"propagation_evidence,omitempty"`
+	FixRef              interface{}                `json:"fix_ref,omitempty"`
+	FixRepo             string                     `json:"fix_repo"`
+	Propagation         enums.CrossRepoPropagation `json:"propagation"`
+	PropagationEvidence interface{}                `json:"propagation_evidence,omitempty"`
 }
 
 type Regression struct {
@@ -50,13 +50,13 @@ type RegressionCvss struct {
 }
 
 type RemediationCommit struct {
-	Author    string      `json:"author"`
-	Date      string      `json:"date"`
-	PrNumber  interface{} `json:"pr_number,omitempty"`
-	Relevance string      `json:"relevance"`
-	Sha       string      `json:"sha"`
-	ShortSha  string      `json:"short_sha"`
-	Subject   string      `json:"subject"`
+	Author    string                           `json:"author"`
+	Date      string                           `json:"date"`
+	PrNumber  interface{}                      `json:"pr_number,omitempty"`
+	Relevance enums.RemediationCommitRelevance `json:"relevance"`
+	Sha       string                           `json:"sha"`
+	ShortSha  string                           `json:"short_sha"`
+	Subject   string                           `json:"subject"`
 }
 
 type TimelineEntry struct {
@@ -105,17 +105,17 @@ type VerificationSummaryByVerdict struct {
 }
 
 type VerifiedFinding struct {
-	CrossRepo            *CrossRepo              `json:"cross_repo,omitempty"`
-	DispositionRationale interface{}             `json:"disposition_rationale,omitempty"`
-	Evidence             VerifiedFindingEvidence `json:"evidence"`
-	OriginalId           string                  `json:"original_id"`
-	OriginalSeverity     enums.Severity          `json:"original_severity"`
-	OriginalTitle        string                  `json:"original_title"`
-	RemediationCommits   []RemediationCommit     `json:"remediation_commits"`
-	ResidualRisk         interface{}             `json:"residual_risk,omitempty"`
-	ResidualSeverity     interface{}             `json:"residual_severity,omitempty"`
-	Unattributed         bool                    `json:"unattributed"`
-	Verdict              string                  `json:"verdict"`
+	CrossRepo            *CrossRepo                `json:"cross_repo,omitempty"`
+	DispositionRationale interface{}               `json:"disposition_rationale,omitempty"`
+	Evidence             VerifiedFindingEvidence   `json:"evidence"`
+	OriginalId           string                    `json:"original_id"`
+	OriginalSeverity     enums.Severity            `json:"original_severity"`
+	OriginalTitle        string                    `json:"original_title"`
+	RemediationCommits   []RemediationCommit       `json:"remediation_commits"`
+	ResidualRisk         interface{}               `json:"residual_risk,omitempty"`
+	ResidualSeverity     interface{}               `json:"residual_severity,omitempty"`
+	Unattributed         bool                      `json:"unattributed"`
+	Verdict              enums.VerificationVerdict `json:"verdict"`
 }
 
 type VerifiedFindingEvidence struct {

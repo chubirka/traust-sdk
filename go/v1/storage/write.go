@@ -123,9 +123,6 @@ func (s *sqlStore) writeArtifact(
 	if err = s.insertEvidence(ctx, conn, input, state); err != nil {
 		return result, err
 	}
-	if err = s.verifyEvidence(ctx, conn, input.payload, state.digest); err != nil {
-		return result, err
-	}
 	if err = s.insertBinding(ctx, conn, input.name, state); err != nil {
 		return result, err
 	}
@@ -193,32 +190,14 @@ func (s *sqlStore) insertEvidence(
 	input artifactWrite,
 	state writeState,
 ) error {
+	// storage/v1 records the digest and byte size only. The digest is the
+	// primary key, so identical bytes always land on the same row.
 	if err := s.queries.artifactEvidenceUpsert(ctx, conn, artifactEvidenceUpsertParams{
 		digest:          state.digest,
-		payload:         input.payload,
+		byteSize:        int64(len(input.payload)),
 		firstIngestedAt: nowUTC(),
 	}); err != nil {
 		return wrap(OperationSave, PhaseEvidence, err)
-	}
-	return nil
-}
-
-func (s *sqlStore) verifyEvidence(
-	ctx context.Context,
-	conn *sql.Conn,
-	payload []byte,
-	digest string,
-) error {
-	var stored []byte
-	if err := s.queries.artifactEvidenceGet(
-		ctx,
-		conn,
-		artifactEvidenceGetParams{digest: digest},
-	).Scan(&stored); err != nil {
-		return wrap(OperationSave, PhaseEvidence, err)
-	}
-	if !bytes.Equal(stored, payload) {
-		return wrap(OperationSave, PhaseEvidence, ErrEvidenceCorrupt)
 	}
 	return nil
 }

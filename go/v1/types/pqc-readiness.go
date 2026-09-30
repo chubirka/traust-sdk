@@ -1,6 +1,10 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
+
+import (
+	"github.com/traust-security/traust-sdk/go/v1/enums"
+)
 
 type PqcReadiness struct {
 	ClockItems        []PqcReadinessClockItemsItem        `json:"clock_items,omitempty"`
@@ -9,7 +13,7 @@ type PqcReadiness struct {
 	Metadata          PqcReadinessMetadata                `json:"metadata"`
 	Notes             *string                             `json:"notes,omitempty"`
 	ProvenanceSummary PqcReadinessProvenanceSummary       `json:"provenance_summary"`
-	ReadinessBucket   *string                             `json:"readiness_bucket,omitempty"`
+	ReadinessBucket   *enums.PqcReadinessBucket           `json:"readiness_bucket,omitempty"`
 	Remediations      []PqcReadinessRemediationsItem      `json:"remediations,omitempty"`
 	RuntimeEvidence   *PqcReadinessRuntimeEvidence        `json:"runtime_evidence,omitempty"`
 	Scores            PqcReadinessScores                  `json:"scores"`
@@ -29,29 +33,29 @@ type DomainChecksItem struct {
 	Id               string                            `json:"id"`
 	Points           *float64                          `json:"points,omitempty"`
 	Rationale        *string                           `json:"rationale,omitempty"`
-	Result           string                            `json:"result"`
+	Result           enums.IsolationCheckResult        `json:"result"`
 }
 
 type DomainChecksItemCryptoGovernance struct {
-	Class            *string  `json:"class,omitempty"`
-	DetectionFacts   []string `json:"detection_facts,omitempty"`
-	EvaluationTarget *string  `json:"evaluation_target,omitempty"`
-	Governor         *string  `json:"governor,omitempty"`
+	Class            *enums.CryptoGovernanceClass `json:"class,omitempty"`
+	DetectionFacts   []string                     `json:"detection_facts,omitempty"`
+	EvaluationTarget *string                      `json:"evaluation_target,omitempty"`
+	Governor         *string                      `json:"governor,omitempty"`
 }
 
 type PqcReadinessClockItemsItem struct {
-	BlastRadius       *string     `json:"blast_radius,omitempty"`
-	DeprecatedAfter   interface{} `json:"deprecated_after,omitempty"`
-	DisallowedAfter   interface{} `json:"disallowed_after"`
-	FactIds           []string    `json:"fact_ids"`
-	Primitive         string      `json:"primitive"`
-	RemediationEffort *string     `json:"remediation_effort,omitempty"`
+	BlastRadius       *enums.PqcBlastRadius    `json:"blast_radius,omitempty"`
+	DeprecatedAfter   interface{}              `json:"deprecated_after,omitempty"`
+	DisallowedAfter   interface{}              `json:"disallowed_after"`
+	FactIds           []string                 `json:"fact_ids"`
+	Primitive         string                   `json:"primitive"`
+	RemediationEffort *enums.RemediationEffort `json:"remediation_effort,omitempty"`
 }
 
 type PqcReadinessFipsInteraction struct {
-	FactIds   []string `json:"fact_ids"`
-	Rationale *string  `json:"rationale,omitempty"`
-	Verdict   string   `json:"verdict"`
+	FactIds   []string                 `json:"fact_ids"`
+	Rationale *string                  `json:"rationale,omitempty"`
+	Verdict   enums.PqcFipsInteraction `json:"verdict"`
 }
 
 type PqcReadinessFlags struct {
@@ -61,13 +65,13 @@ type PqcReadinessFlags struct {
 }
 
 type PqcReadinessMetadata struct {
-	AssessedAt      *string                  `json:"assessed_at,omitempty"`
-	AssessmentBasis string                   `json:"assessment_basis"`
-	CbomRef         interface{}              `json:"cbom_ref,omitempty"`
-	Commit          interface{}              `json:"commit,omitempty"`
-	FactsRef        *string                  `json:"facts_ref,omitempty"`
-	Repository      string                   `json:"repository"`
-	Tool            PqcReadinessMetadataTool `json:"tool"`
+	AssessedAt      *string                           `json:"assessed_at,omitempty"`
+	AssessmentBasis enums.PqcReadinessAssessmentBasis `json:"assessment_basis"`
+	CbomRef         interface{}                       `json:"cbom_ref,omitempty"`
+	Commit          interface{}                       `json:"commit,omitempty"`
+	FactsRef        *string                           `json:"facts_ref,omitempty"`
+	Repository      string                            `json:"repository"`
+	Tool            PqcReadinessMetadataTool          `json:"tool"`
 }
 
 type PqcReadinessMetadataTool struct {
@@ -78,23 +82,23 @@ type PqcReadinessMetadataTool struct {
 }
 
 type PqcReadinessProvenanceSummary struct {
-	Counts   map[string]int `json:"counts"`
-	Dominant string         `json:"dominant"`
+	Counts   map[string]int              `json:"counts"`
+	Dominant enums.PqcDominantProvenance `json:"dominant"`
 }
 
 type PqcReadinessRemediationsItem struct {
-	Action            string      `json:"action"`
-	BlastRadius       *string     `json:"blast_radius,omitempty"`
-	BlockedOn         interface{} `json:"blocked_on,omitempty"`
-	Category          string      `json:"category"`
-	Deadline          interface{} `json:"deadline,omitempty"`
-	Details           interface{} `json:"details,omitempty"`
-	FactIds           []string    `json:"fact_ids,omitempty"`
-	Id                string      `json:"id"`
-	Locations         []string    `json:"locations,omitempty"`
-	Recipe            interface{} `json:"recipe,omitempty"`
-	RemediationEffort *string     `json:"remediation_effort,omitempty"`
-	Target            interface{} `json:"target,omitempty"`
+	Action            string                       `json:"action"`
+	BlastRadius       *enums.PqcBlastRadius        `json:"blast_radius,omitempty"`
+	BlockedOn         interface{}                  `json:"blocked_on,omitempty"`
+	Category          enums.PqcRemediationCategory `json:"category"`
+	Deadline          interface{}                  `json:"deadline,omitempty"`
+	Details           interface{}                  `json:"details,omitempty"`
+	FactIds           []string                     `json:"fact_ids,omitempty"`
+	Id                string                       `json:"id"`
+	Locations         []string                     `json:"locations,omitempty"`
+	Recipe            interface{}                  `json:"recipe,omitempty"`
+	RemediationEffort *enums.RemediationEffort     `json:"remediation_effort,omitempty"`
+	Target            interface{}                  `json:"target,omitempty"`
 }
 
 type PqcReadinessRuntimeEvidence struct {
@@ -114,7 +118,7 @@ type PqcReadinessScores struct {
 }
 
 type PqcReadinessServerSideCaveatsItem struct {
-	CaveatType string   `json:"caveat_type"`
-	FactIds    []string `json:"fact_ids"`
-	Rationale  *string  `json:"rationale,omitempty"`
+	CaveatType enums.PqcCaveatType `json:"caveat_type"`
+	FactIds    []string            `json:"fact_ids"`
+	Rationale  *string             `json:"rationale,omitempty"`
 }

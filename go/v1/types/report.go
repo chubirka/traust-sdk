@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -119,13 +119,13 @@ type PeachIsolationReview struct {
 }
 
 type PeachIsolationReviewInterfacesItem struct {
-	BoundaryType  string         `json:"boundary_type"`
-	Complexity    enums.Severity `json:"complexity"`
-	FindingIds    []string       `json:"finding_ids,omitempty"`
-	HardeningGaps []string       `json:"hardening_gaps,omitempty"`
-	Name          string         `json:"name"`
-	Notes         *string        `json:"notes,omitempty"`
-	Shared        bool           `json:"shared"`
+	BoundaryType  enums.PeachBoundaryType   `json:"boundary_type"`
+	Complexity    enums.InterfaceComplexity `json:"complexity"`
+	FindingIds    []string                  `json:"finding_ids,omitempty"`
+	HardeningGaps []string                  `json:"hardening_gaps,omitempty"`
+	Name          string                    `json:"name"`
+	Notes         *string                   `json:"notes,omitempty"`
+	Shared        bool                      `json:"shared"`
 }
 
 type ReportDisposition struct {
@@ -149,33 +149,33 @@ type ReportDispositionSeverityOverride struct {
 }
 
 type ReportFinding struct {
-	AsvsReferences      []string                 `json:"asvs_references,omitempty"`
-	AttackPattern       *string                  `json:"attack_pattern,omitempty"`
-	Capec               []string                 `json:"capec,omitempty"`
-	Category            *string                  `json:"category,omitempty"`
-	Cvss                *ReportFindingCvss       `json:"cvss,omitempty"`
-	Cwes                []string                 `json:"cwes"`
-	Dependency          *ReportFindingDependency `json:"dependency,omitempty"`
-	Description         string                   `json:"description"`
-	Disposition         *ReportDisposition       `json:"disposition,omitempty"`
-	EffectiveSeverity   *enums.Severity          `json:"effective_severity,omitempty"`
-	Evidence            []EvidenceBlock          `json:"evidence,omitempty"`
-	Fingerprint         *string                  `json:"fingerprint,omitempty"`
-	FingerprintAlgo     *string                  `json:"fingerprint_algo,omitempty"`
-	Id                  string                   `json:"id"`
-	IsolationBoundary   *string                  `json:"isolation_boundary,omitempty"`
-	IsolationDimensions []string                 `json:"isolation_dimensions,omitempty"`
-	Locations           []Location               `json:"locations"`
-	Origin              *string                  `json:"origin,omitempty"`
-	Passes              []int                    `json:"passes,omitempty"`
-	PeachReferences     []string                 `json:"peach_references,omitempty"`
-	PqcClassification   *string                  `json:"pqc_classification,omitempty"`
-	Remediation         string                   `json:"remediation"`
-	RemediationEffort   *string                  `json:"remediation_effort,omitempty"`
-	Severity            enums.Severity           `json:"severity"`
-	SourceFindings      []string                 `json:"source_findings,omitempty"`
-	Title               string                   `json:"title"`
-	ValidationStatus    *enums.Validity          `json:"validation_status,omitempty"`
+	AsvsReferences      []string                   `json:"asvs_references,omitempty"`
+	AttackPattern       *string                    `json:"attack_pattern,omitempty"`
+	Capec               []string                   `json:"capec,omitempty"`
+	Category            *string                    `json:"category,omitempty"`
+	Cvss                *ReportFindingCvss         `json:"cvss,omitempty"`
+	Cwes                []string                   `json:"cwes"`
+	Dependency          *ReportFindingDependency   `json:"dependency,omitempty"`
+	Description         string                     `json:"description"`
+	Disposition         *ReportDisposition         `json:"disposition,omitempty"`
+	EffectiveSeverity   *enums.Severity            `json:"effective_severity,omitempty"`
+	Evidence            []EvidenceBlock            `json:"evidence,omitempty"`
+	Fingerprint         *string                    `json:"fingerprint,omitempty"`
+	FingerprintAlgo     *string                    `json:"fingerprint_algo,omitempty"`
+	Id                  string                     `json:"id"`
+	IsolationBoundary   *string                    `json:"isolation_boundary,omitempty"`
+	IsolationDimensions []enums.IsolationDimension `json:"isolation_dimensions,omitempty"`
+	Locations           []Location                 `json:"locations"`
+	Origin              *enums.FindingOrigin       `json:"origin,omitempty"`
+	Passes              []int                      `json:"passes,omitempty"`
+	PeachReferences     []string                   `json:"peach_references,omitempty"`
+	PqcClassification   *enums.PqcClassification   `json:"pqc_classification,omitempty"`
+	Remediation         string                     `json:"remediation"`
+	RemediationEffort   *enums.RemediationEffort   `json:"remediation_effort,omitempty"`
+	Severity            enums.Severity             `json:"severity"`
+	SourceFindings      []string                   `json:"source_findings,omitempty"`
+	Title               string                     `json:"title"`
+	ValidationStatus    *enums.Validity            `json:"validation_status,omitempty"`
 }
 
 type ReportFindingCvss struct {
@@ -184,21 +184,21 @@ type ReportFindingCvss struct {
 }
 
 type ReportFindingDependency struct {
-	Advisory         string                      `json:"advisory"`
-	Classification   *enums.ImpactClassification `json:"classification,omitempty"`
-	Ecosystem        *string                     `json:"ecosystem,omitempty"`
-	EvidenceLevel    *string                     `json:"evidence_level,omitempty"`
-	FixedVersion     *string                     `json:"fixed_version,omitempty"`
-	ImpactArtifact   *string                     `json:"impact_artifact,omitempty"`
-	InstalledVersion *string                     `json:"installed_version,omitempty"`
-	Module           string                      `json:"module"`
-	Purl             *string                     `json:"purl,omitempty"`
-	VulnerableRange  *string                     `json:"vulnerable_range,omitempty"`
+	Advisory         string                         `json:"advisory"`
+	Classification   *enums.ImpactClassification    `json:"classification,omitempty"`
+	Ecosystem        *enums.Ecosystem               `json:"ecosystem,omitempty"`
+	EvidenceLevel    *enums.DependencyEvidenceLevel `json:"evidence_level,omitempty"`
+	FixedVersion     *string                        `json:"fixed_version,omitempty"`
+	ImpactArtifact   *string                        `json:"impact_artifact,omitempty"`
+	InstalledVersion *string                        `json:"installed_version,omitempty"`
+	Module           string                         `json:"module"`
+	Purl             *string                        `json:"purl,omitempty"`
+	VulnerableRange  *string                        `json:"vulnerable_range,omitempty"`
 }
 
 type ReportMetadata struct {
 	Additional   *ReportMetadataAdditional   `json:"additional,omitempty"`
-	AuditProfile *string                     `json:"audit_profile,omitempty"`
+	AuditProfile *enums.AuditProfile         `json:"audit_profile,omitempty"`
 	Auditor      *string                     `json:"auditor,omitempty"`
 	Commit       *string                     `json:"commit,omitempty"`
 	Date         string                      `json:"date"`

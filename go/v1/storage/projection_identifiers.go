@@ -1,4 +1,4 @@
-// Code generated from traust-contracts bfd089d4336ae2588b486d494a84a9f68419d5ab projection metadata. DO NOT EDIT.
+// Code generated from traust-contracts 65b16f8c72159970a3aec15121601739f59867b9 projection metadata. DO NOT EDIT.
 
 package storage
 
@@ -25,6 +25,7 @@ const (
 	projectionPQCFacts                            projectionName  = "pqc_facts"
 	projectionPQCReadiness                        projectionName  = "pqc_readiness"
 	projectionPrivProfile                         projectionName  = "priv_profile"
+	projectionRefutedRegister                     projectionName  = "refuted_register"
 	projectionRemediation                         projectionName  = "remediation"
 	projectionReport                              projectionName  = "report"
 	projectionReportFinding                       projectionName  = "report_finding"
@@ -52,6 +53,7 @@ const (
 	projectionFieldCoverage                       projectionField = "coverage"
 	projectionFieldDependencyAudit                projectionField = "dependency_audit"
 	projectionFieldDispositionSummary             projectionField = "disposition_summary"
+	projectionFieldEntries                        projectionField = "entries"
 	projectionFieldEvidence                       projectionField = "evidence"
 	projectionFieldExampleOrTestManifestsExcluded projectionField = "example_or_test_manifests_excluded"
 	projectionFieldExecutiveSummary               projectionField = "executive_summary"
@@ -118,6 +120,7 @@ const (
 	projectionFieldSource                         projectionField = "source"
 	projectionFieldSourceFindings                 projectionField = "source_findings"
 	projectionFieldSourceReports                  projectionField = "source_reports"
+	projectionFieldSources                        projectionField = "sources"
 	projectionFieldStamps                         projectionField = "stamps"
 	projectionFieldSummary                        projectionField = "summary"
 	projectionFieldTargets                        projectionField = "targets"

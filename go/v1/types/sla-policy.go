@@ -1,9 +1,13 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
+import (
+	"github.com/traust-security/traust-sdk/go/v1/enums"
+)
+
 type SlaPolicy struct {
-	ClockStart      *string                           `json:"clock_start,omitempty"`
+	ClockStart      *enums.SlaClockStart              `json:"clock_start,omitempty"`
 	PolicyName      string                            `json:"policy_name"`
 	Profiles        map[string]SlaPolicyProfilesEntry `json:"profiles"`
 	SeverityMapping map[string]interface{}            `json:"severity_mapping"`

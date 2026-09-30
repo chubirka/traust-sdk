@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -33,33 +33,34 @@ type Disposition struct {
 }
 
 type Event struct {
-	Alias           *EventAlias      `json:"alias,omitempty"`
-	AutoAcceptTier  *bool            `json:"auto_accept_tier,omitempty"`
-	Disposition     Disposition      `json:"disposition"`
-	EventId         string           `json:"event_id"`
-	EvidenceGrade   *string          `json:"evidence_grade,omitempty"`
-	EvidenceRefs    []string         `json:"evidence_refs,omitempty"`
-	Finding         *EventFinding    `json:"finding,omitempty"`
-	FindingRef      string           `json:"finding_ref"`
-	Fingerprint     *string          `json:"fingerprint,omitempty"`
-	FingerprintAlgo *string          `json:"fingerprint_algo,omitempty"`
-	HarnessVersion  *string          `json:"harness_version,omitempty"`
-	OccurredAt      *string          `json:"occurred_at,omitempty"`
-	Rationale       string           `json:"rationale"`
-	RecordedAt      string           `json:"recorded_at"`
-	RiskWeight      *EventRiskWeight `json:"risk_weight,omitempty"`
-	Source          EventSource      `json:"source"`
+	Alias           *EventAlias       `json:"alias,omitempty"`
+	AutoAcceptTier  *bool             `json:"auto_accept_tier,omitempty"`
+	Disposition     Disposition       `json:"disposition"`
+	EventId         string            `json:"event_id"`
+	EvidenceGrade   *string           `json:"evidence_grade,omitempty"`
+	EvidenceRefs    []string          `json:"evidence_refs,omitempty"`
+	Finding         *EventFinding     `json:"finding,omitempty"`
+	FindingRef      string            `json:"finding_ref"`
+	Fingerprint     *string           `json:"fingerprint,omitempty"`
+	FingerprintAlgo *string           `json:"fingerprint_algo,omitempty"`
+	HarnessVersion  *string           `json:"harness_version,omitempty"`
+	OccurredAt      *string           `json:"occurred_at,omitempty"`
+	Rationale       string            `json:"rationale"`
+	RecordedAt      string            `json:"recorded_at"`
+	Restatement     *EventRestatement `json:"restatement,omitempty"`
+	RiskWeight      *EventRiskWeight  `json:"risk_weight,omitempty"`
+	Source          EventSource       `json:"source"`
 }
 
 type EventAlias struct {
-	Confirmed     *bool    `json:"confirmed,omitempty"`
-	FromReport    *string  `json:"from_report,omitempty"`
-	MatchedBy     string   `json:"matched_by"`
-	NewFindingRef string   `json:"new_finding_ref"`
-	Note          *string  `json:"note,omitempty"`
-	PathOverlap   *float64 `json:"path_overlap,omitempty"`
-	Rejected      *bool    `json:"rejected,omitempty"`
-	Similarity    *float64 `json:"similarity,omitempty"`
+	Confirmed     *bool                `json:"confirmed,omitempty"`
+	FromReport    *string              `json:"from_report,omitempty"`
+	MatchedBy     enums.AliasMatchedBy `json:"matched_by"`
+	NewFindingRef string               `json:"new_finding_ref"`
+	Note          *string              `json:"note,omitempty"`
+	PathOverlap   *float64             `json:"path_overlap,omitempty"`
+	Rejected      *bool                `json:"rejected,omitempty"`
+	Similarity    *float64             `json:"similarity,omitempty"`
 }
 
 type EventFinding struct {
@@ -75,11 +76,26 @@ type EventFinding struct {
 	ValidationStatus *string                  `json:"validation_status,omitempty"`
 }
 
+type EventRestatement struct {
+	After      interface{}               `json:"after"`
+	Authority  EventRestatementAuthority `json:"authority"`
+	Before     interface{}               `json:"before"`
+	Reason     enums.RestatementReason   `json:"reason"`
+	SchemaFrom *string                   `json:"schema_from,omitempty"`
+	SchemaTo   *string                   `json:"schema_to,omitempty"`
+	Target     enums.RestatementTarget   `json:"target"`
+}
+
+type EventRestatementAuthority struct {
+	ApprovedBy *string `json:"approved_by,omitempty"`
+	Ticket     string  `json:"ticket"`
+}
+
 type EventRiskWeight struct {
-	Lambda         float64 `json:"lambda"`
-	ProfileSource  string  `json:"profile_source"`
-	TenancyProfile string  `json:"tenancy_profile"`
-	WeightsVersion string  `json:"weights_version"`
+	Lambda         float64              `json:"lambda"`
+	ProfileSource  string               `json:"profile_source"`
+	TenancyProfile enums.TenancyProfile `json:"tenancy_profile"`
+	WeightsVersion string               `json:"weights_version"`
 }
 
 type EventSource struct {
@@ -114,28 +130,28 @@ type LayerMetadata struct {
 }
 
 type LayerMetadataExternalRefsEntryItem struct {
-	Confidence *string `json:"confidence,omitempty"`
-	Id         string  `json:"id"`
-	MatchedOn  *string `json:"matched_on,omitempty"`
-	StampedAt  *string `json:"stamped_at,omitempty"`
-	System     string  `json:"system"`
-	Url        *string `json:"url,omitempty"`
+	Confidence *enums.ExternalRefConfidence `json:"confidence,omitempty"`
+	Id         string                       `json:"id"`
+	MatchedOn  *string                      `json:"matched_on,omitempty"`
+	StampedAt  *string                      `json:"stamped_at,omitempty"`
+	System     enums.ExternalRefSystem      `json:"system"`
+	Url        *string                      `json:"url,omitempty"`
 }
 
 type LayerMetadataFindingAliasesEntry struct {
-	Confirmed   *bool    `json:"confirmed,omitempty"`
-	ConfirmedAt *string  `json:"confirmed_at,omitempty"`
-	ConfirmedBy *string  `json:"confirmed_by,omitempty"`
-	FromReport  *string  `json:"from_report,omitempty"`
-	MappedAt    string   `json:"mapped_at"`
-	MatchedBy   string   `json:"matched_by"`
-	NewId       string   `json:"new_id"`
-	Note        *string  `json:"note,omitempty"`
-	PathOverlap *float64 `json:"path_overlap,omitempty"`
-	Rejected    *bool    `json:"rejected,omitempty"`
-	RejectedAt  *string  `json:"rejected_at,omitempty"`
-	RejectedBy  *string  `json:"rejected_by,omitempty"`
-	Similarity  *float64 `json:"similarity,omitempty"`
+	Confirmed   *bool                `json:"confirmed,omitempty"`
+	ConfirmedAt *string              `json:"confirmed_at,omitempty"`
+	ConfirmedBy *string              `json:"confirmed_by,omitempty"`
+	FromReport  *string              `json:"from_report,omitempty"`
+	MappedAt    string               `json:"mapped_at"`
+	MatchedBy   enums.AliasMatchedBy `json:"matched_by"`
+	NewId       string               `json:"new_id"`
+	Note        *string              `json:"note,omitempty"`
+	PathOverlap *float64             `json:"path_overlap,omitempty"`
+	Rejected    *bool                `json:"rejected,omitempty"`
+	RejectedAt  *string              `json:"rejected_at,omitempty"`
+	RejectedBy  *string              `json:"rejected_by,omitempty"`
+	Similarity  *float64             `json:"similarity,omitempty"`
 }
 
 type ReviewItem struct {
@@ -145,7 +161,8 @@ type ReviewItem struct {
 	Quote                string                        `json:"quote"`
 	ResolutionNote       *string                       `json:"resolution_note,omitempty"`
 	SourceRef            string                        `json:"source_ref"`
-	Status               string                        `json:"status"`
+	Status               enums.ReviewItemStatus        `json:"status"`
+	SubmittedBy          *Actor                        `json:"submitted_by,omitempty"`
 	SuggestedDisposition *Disposition                  `json:"suggested_disposition,omitempty"`
 	SuggestedFindingRef  *string                       `json:"suggested_finding_ref,omitempty"`
 }

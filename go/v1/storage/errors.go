@@ -21,6 +21,10 @@ var (
 	ErrArtifactTypeMismatch = errors.New("storage artifact type mismatch")
 	ErrBindingMismatch      = errors.New("storage artifact binding context mismatch")
 	ErrEvidenceCorrupt      = errors.New("storage evidence digest mismatch")
+	// ErrArtifactBytesNotRetained is returned by typed Get operations and
+	// GetEvidence: storage/v1 records an artifact's digest and byte size, not
+	// its bytes.
+	ErrArtifactBytesNotRetained = errors.New("storage does not retain artifact bytes")
 )
 
 type Operation string

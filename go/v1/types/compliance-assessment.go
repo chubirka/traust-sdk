@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -36,9 +36,9 @@ type ComplianceAssessmentMetadata struct {
 }
 
 type ComplianceAssessmentMetadataFrameworksItem struct {
-	Caveat  *string `json:"caveat,omitempty"`
-	Id      string  `json:"id"`
-	Profile *string `json:"profile,omitempty"`
+	Caveat  *string                   `json:"caveat,omitempty"`
+	Id      enums.ComplianceFramework `json:"id"`
+	Profile *string                   `json:"profile,omitempty"`
 }
 
 type ComplianceAssessmentMetadataOwnerAttestationsItem struct {
@@ -54,14 +54,14 @@ type ComplianceAssessmentMetadataOwnerAttestationsItem struct {
 type ComplianceAssessmentMetadataTarget struct {
 	CdeBoundary            *string                                  `json:"cde_boundary,omitempty"`
 	Environment            *string                                  `json:"environment,omitempty"`
-	Kind                   string                                   `json:"kind"`
+	Kind                   enums.ComplianceTargetKind               `json:"kind"`
 	PersonalDataStores     []string                                 `json:"personal_data_stores,omitempty"`
 	Product                *string                                  `json:"product,omitempty"`
 	Repos                  []string                                 `json:"repos,omitempty"`
 	Scope                  *ComplianceAssessmentMetadataTargetScope `json:"scope,omitempty"`
 	ScopeBindingMode       *string                                  `json:"scope_binding_mode,omitempty"`
 	SnapshotId             *string                                  `json:"snapshot_id,omitempty"`
-	TrustServiceCategories []string                                 `json:"trust_service_categories,omitempty"`
+	TrustServiceCategories []enums.TrustServiceCategory             `json:"trust_service_categories,omitempty"`
 }
 
 type ComplianceAssessmentMetadataTargetScope struct {
@@ -71,7 +71,7 @@ type ComplianceAssessmentMetadataTargetScope struct {
 	Draft        bool                                                  `json:"draft"`
 	Excluded     []ComplianceAssessmentMetadataTargetScopeExcludedItem `json:"excluded,omitempty"`
 	RegistryHash interface{}                                           `json:"registry_hash,omitempty"`
-	ResolvesVia  string                                                `json:"resolves_via"`
+	ResolvesVia  enums.ComplianceTargetResolvesVia                     `json:"resolves_via"`
 }
 
 type ComplianceAssessmentMetadataTargetScopeExcludedItem struct {
@@ -81,7 +81,7 @@ type ComplianceAssessmentMetadataTargetScopeExcludedItem struct {
 
 type ComplianceAssessmentResultsItem struct {
 	CheckId        *string                                        `json:"check_id,omitempty"`
-	Classification string                                         `json:"classification"`
+	Classification enums.ComplianceControlClassification          `json:"classification"`
 	ControlId      string                                         `json:"control_id"`
 	Evidence       []ComplianceAssessmentResultsItemEvidenceItem  `json:"evidence,omitempty"`
 	Framework      string                                         `json:"framework"`
@@ -91,14 +91,14 @@ type ComplianceAssessmentResultsItem struct {
 	Reason         *string                                        `json:"reason,omitempty"`
 	Title          *string                                        `json:"title,omitempty"`
 	Verdict        enums.ComplianceVerdict                        `json:"verdict"`
-	VerdictSource  string                                         `json:"verdict_source"`
+	VerdictSource  enums.ComplianceVerdictSource                  `json:"verdict_source"`
 }
 
 type ComplianceAssessmentResultsItemEvidenceItem struct {
-	Excerpt *string `json:"excerpt,omitempty"`
-	Kind    string  `json:"kind"`
-	Locator string  `json:"locator"`
-	Sha256  string  `json:"sha256"`
+	Excerpt *string                      `json:"excerpt,omitempty"`
+	Kind    enums.ComplianceEvidenceKind `json:"kind"`
+	Locator string                       `json:"locator"`
+	Sha256  string                       `json:"sha256"`
 }
 
 type ComplianceAssessmentResultsItemNPassAgreement struct {
