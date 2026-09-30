@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -59,7 +58,7 @@ func openPostgresStorage(t *testing.T) (*Client, *sql.DB) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = db.Close() })
-	client, err := NewClient(context.Background(), db)
+	client, err := NewClient(context.Background(), db, newTestObjectStore())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,8 +87,9 @@ func TestPostgresBindingProtocol(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := client.GetVulnFindings(ctx, result.BindingID); !errors.Is(err, ErrArtifactBytesNotRetained) {
-		t.Fatalf("typed read = %v, want ErrArtifactBytesNotRetained", err)
+	stored, err := client.GetVulnFindings(ctx, result.BindingID)
+	if err != nil || !bytes.Equal(stored.Payload(), payload) {
+		t.Fatalf("typed read = %v, want exact original bytes", err)
 	}
 	again, err := client.SaveVulnFindings(ctx, SaveVulnFindingsInput{
 		Binding: binding, Artifact: artifact,

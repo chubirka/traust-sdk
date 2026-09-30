@@ -86,6 +86,14 @@ func (s *sqlStore) writeArtifact(
 		binding:   input.binding,
 	}
 
+	// Put before the SQL transaction: a rollback can leave an unreferenced object,
+	// but a committed binding must never point at bytes that were never written.
+	// Orphan collection must check for active bindings before removing objects.
+	meta := ObjectMeta{Digest: digest, Size: int64(len(input.payload)), ArtifactName: input.name, ContractsVersion: storageFormatVersion}
+	if err := s.objects.Put(ctx, meta, input.payload); err != nil {
+		return result, wrap(OperationSave, PhaseEvidence, err)
+	}
+
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
 		return result, wrap(OperationSave, PhaseConnect, err)

@@ -1,10 +1,10 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"reflect"
 	"strings"
 	"testing"
@@ -55,8 +55,9 @@ func checkReportProjection(t *testing.T, client *Client, db *sql.DB, prefix stri
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := client.GetReport(ctx, result.BindingID); !errors.Is(err, ErrArtifactBytesNotRetained) {
-		t.Fatalf("report read = %v, want ErrArtifactBytesNotRetained", err)
+	stored, err := client.GetReport(ctx, result.BindingID)
+	if err != nil || !bytes.Equal(stored.Payload(), payload) {
+		t.Fatalf("report read = %v, want exact original bytes", err)
 	}
 	var original map[string]any
 	if err := json.Unmarshal(payload, &original); err != nil {

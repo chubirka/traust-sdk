@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"reflect"
 )
 
 const (
@@ -27,12 +28,23 @@ type sqlStore struct {
 	db      *sql.DB
 	dialect dialect
 	queries queries
+	objects ObjectStore
 }
 
-// NewClient binds storage to a caller-owned database pool.
-func NewClient(ctx context.Context, db *sql.DB) (*Client, error) {
+// NewClient binds storage to a caller-owned database pool and required object store.
+func NewClient(ctx context.Context, db *sql.DB, objects ObjectStore) (*Client, error) {
 	if db == nil {
 		return nil, wrap(OperationInit, PhaseInput, ErrNilDatabase)
+	}
+	if objects == nil {
+		return nil, wrap(OperationInit, PhaseInput, ErrNilObjectStore)
+	}
+	value := reflect.ValueOf(objects)
+	switch value.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
+		if value.IsNil() {
+			return nil, wrap(OperationInit, PhaseInput, ErrNilObjectStore)
+		}
 	}
 	conn, err := db.Conn(ctx)
 	if err != nil {
@@ -44,7 +56,7 @@ func NewClient(ctx context.Context, db *sql.DB) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Client{store: &sqlStore{db: db, dialect: dialect, queries: queries{dialect: dialect}}}, nil
+	return &Client{store: &sqlStore{db: db, dialect: dialect, queries: queries{dialect: dialect}, objects: objects}}, nil
 }
 
 // Init creates storage in an empty database or verifies its exact revision.

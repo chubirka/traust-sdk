@@ -1,4 +1,4 @@
-// Code generated from traust-contracts 65b16f8c72159970a3aec15121601739f59867b9 SQL queries. DO NOT EDIT.
+// Code generated from traust-contracts 81106987e9543e0d8b8c0c1b3a7f8341968dbbe6 SQL queries. DO NOT EDIT.
 
 package storage
 
@@ -138,6 +138,21 @@ func (q queries) artifactEvidenceUpsert(ctx context.Context, conn *sql.Conn, p a
 	}
 	_, err := conn.ExecContext(ctx, statement, p.digest, p.byteSize, p.firstIngestedAt)
 	return err
+}
+
+const artifactEvidenceSizeGetPostgres = "SELECT byte_size\nFROM traust_storage.artifact_evidence\nWHERE digest = $1;"
+const artifactEvidenceSizeGetSQLite = "SELECT byte_size\nFROM artifact_evidence\nWHERE digest = ?;"
+
+type artifactEvidenceSizeGetParams struct {
+	digest string
+}
+
+func (q queries) artifactEvidenceSizeGet(ctx context.Context, conn *sql.Conn, p artifactEvidenceSizeGetParams) *sql.Row {
+	statement := artifactEvidenceSizeGetSQLite
+	if q.dialect == dialectPostgres {
+		statement = artifactEvidenceSizeGetPostgres
+	}
+	return conn.QueryRowContext(ctx, statement, p.digest)
 }
 
 const attackChainUpsertPostgres = "INSERT INTO traust_storage.attack_chain (\n    binding_id,\n    artifact_digest,\n    chain_id,\n    name,\n    entry_point,\n    terminal_asset,\n    mitre_attack_refs,\n    steps,\n    verdict,\n    narrative\n)\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10\n)\nON CONFLICT (binding_id, chain_id) DO NOTHING;"

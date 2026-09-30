@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"database/sql"
@@ -23,7 +24,7 @@ func openTestStorage(t *testing.T) *Client {
 	}
 	db.SetMaxOpenConns(1)
 	t.Cleanup(func() { _ = db.Close() })
-	client, err := NewClient(context.Background(), db)
+	client, err := NewClient(context.Background(), db, newTestObjectStore())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -241,8 +242,9 @@ func TestSaveRecordsDigestAndBinding(t *testing.T) {
 	if result.Digest != hex.EncodeToString(want[:]) || result.BindingID == "" || result.AlreadyBound {
 		t.Fatalf("result = %+v", result)
 	}
-	if _, err := client.GetVulnFindings(ctx, result.BindingID); !errors.Is(err, ErrArtifactBytesNotRetained) {
-		t.Fatalf("typed read = %v, want ErrArtifactBytesNotRetained", err)
+	stored, err := client.GetVulnFindings(ctx, result.BindingID)
+	if err != nil || !bytes.Equal(stored.Payload(), payload) {
+		t.Fatalf("typed read = %v, want exact original bytes", err)
 	}
 	record, err := client.GetBinding(ctx, result.BindingID)
 	if err != nil || record.Digest != result.Digest || record.ArtifactName != "vuln-findings" {
@@ -327,8 +329,9 @@ func TestTypedReadGuardsBinding(t *testing.T) {
 	if _, err := client.GetTriage(ctx, result.BindingID); !errors.Is(err, ErrArtifactTypeMismatch) {
 		t.Fatalf("type mismatch = %v", err)
 	}
-	if _, err := client.GetEvidence(ctx, result.Digest); !errors.Is(err, ErrArtifactBytesNotRetained) {
-		t.Fatalf("GetEvidence = %v, want ErrArtifactBytesNotRetained", err)
+	stored, err := client.GetEvidence(ctx, result.Digest)
+	if err != nil || !bytes.Equal(stored, payload) {
+		t.Fatalf("GetEvidence = %v, want exact original bytes", err)
 	}
 }
 

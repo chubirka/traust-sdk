@@ -18,6 +18,23 @@ All notable changes to the Go SDK are documented here.
   - Typed `Get*` and `GetEvidence` return `ErrArtifactBytesNotRetained` until
     a caller-supplied object store backs them.
 
+## Unreleased
+
+### Added
+
+- Artifact saves now require a caller-provided digest-addressed object store
+  at client construction; missing stores fail with `ErrNilObjectStore`.
+- Typed reads verify external bytes against the database's digest and size.
+  An exported in-memory store supports tests without an external bucket.
+- External bytes are written before the SQL transaction so failed writes can
+  leave orphaned objects rather than committed bindings without bytes.
+
+### Changed
+
+- Storage clients without an object store must be updated before upgrading.
+  Existing databases with retained payloads require a coordinated byte backfill
+  and schema migration before switching consumers to external storage.
+
 ## [0.14.2]
 
 ### Fixed

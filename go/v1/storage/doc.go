@@ -10,9 +10,10 @@
 // including Ledger fingerprint stamping, happens before Save; storage neither
 // computes nor promotes that enrichment as independent authority.
 //
-// Typed Get operations and GetEvidence resolve a binding but return
-// ErrArtifactBytesNotRetained, because no bytes are retained. Every artifact
-// has a schema-specific SQL projection. Consumers correlate Ledger disposition
+// Typed Get operations and GetEvidence fetch digest-addressed bytes from the
+// required caller-owned ObjectStore and verify their size and SHA-256 before
+// returning them. Every artifact has a schema-specific SQL projection.
+// Consumers correlate Ledger disposition
 // data through the caller-supplied layer ID and artifact-relative finding ID;
 // fingerprints remain payload evidence or Ledger-owned state, not storage join
 // keys. Stored strings remain untrusted when rendered and require

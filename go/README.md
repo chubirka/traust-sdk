@@ -174,7 +174,9 @@ if err != nil {
 }
 defer db.Close()
 
-client, err := storage.NewClient(ctx, db)
+// objects implements storage.ObjectStore; supply an S3, GCS, or directory
+// adapter from your application, or storagetest.MemoryStore in tests.
+client, err := storage.NewClient(ctx, db, objects)
 if err != nil {
     return err
 }
@@ -196,10 +198,16 @@ result, err := client.SaveVulnFindings(ctx, storage.SaveVulnFindingsInput{
 Every schema has named typed save and read operations. A named save validates the
 source bytes, computes their SHA-256 digest, records globally deduplicated
 `artifact_evidence` (digest and byte size), and creates a context-specific
-`artifact_binding` atomically. storage/v1 does not retain artifact bytes, so typed
-reads return `storage.ErrArtifactBytesNotRetained`.
+`artifact_binding` and projection in one SQL transaction. The required external
+`storage.ObjectStore` stores bytes by SHA-256 digest before that transaction, so
+failed database writes can leave unreferenced objects but never dangling bindings.
+A nil store fails construction with `storage.ErrNilObjectStore`. Typed reads
+and `GetEvidence` verify the returned bytes against the recorded size and digest;
+missing objects return `storage.ErrNotFound`. `storage.ObjectKey(prefix, digest)`
+returns a digest-addressed path, and `storagetest.MemoryStore` supports tests
+without a bucket. Store implementations live in consumers, not in the SDK.
 `SaveResult.AlreadyBound` reports only whether that binding existed; evidence-level
-deduplication remains private.
+deduplication remains private. Orphan cleanup must first check active bindings.
 
 The exact-evidence boundary is the named Save call. Callers may perform optional
 processing, such as asking Ledger to stamp finding fingerprints, before creating

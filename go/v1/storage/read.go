@@ -2,7 +2,9 @@ package storage
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 
 	"github.com/traust-security/traust-sdk/go/v1/types"
@@ -31,7 +33,7 @@ func (c *Client) GetEvidence(ctx context.Context, digest string) ([]byte, error)
 		return nil, wrap(OperationRead, PhaseConnect, err)
 	}
 	defer func() { _ = conn.Close() }()
-	return c.store.readEvidence(ctx, conn, digest)
+	return c.store.readEvidence(ctx, conn, ObjectMeta{Digest: digest, ContractsVersion: storageFormatVersion})
 }
 
 func (c *Client) GetBinding(ctx context.Context, bindingID string) (BindingRecord, error) {
@@ -86,7 +88,7 @@ func getTypedArtifact[T any](
 	if record.ArtifactName != name {
 		return zero, wrap(OperationRead, PhaseRead, ErrArtifactTypeMismatch)
 	}
-	payload, err := store.readEvidence(ctx, conn, record.Digest)
+	payload, err := store.readEvidence(ctx, conn, ObjectMeta{Digest: record.Digest, ArtifactName: name, ContractsVersion: storageFormatVersion})
 	if err != nil {
 		return zero, err
 	}
@@ -97,10 +99,27 @@ func getTypedArtifact[T any](
 	return artifact, nil
 }
 
-// readEvidence reports that artifact bytes are unavailable: since contracts
-// 0.37, storage/v1 records only each artifact's digest and byte size.
-func (s *sqlStore) readEvidence(_ context.Context, _ *sql.Conn, _ string) ([]byte, error) {
-	return nil, wrap(OperationRead, PhaseRead, ErrArtifactBytesNotRetained)
+func (s *sqlStore) readEvidence(ctx context.Context, conn *sql.Conn, meta ObjectMeta) ([]byte, error) {
+	var size int64
+	if err := s.queries.artifactEvidenceSizeGet(ctx, conn, artifactEvidenceSizeGetParams{digest: meta.Digest}).Scan(&size); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, wrap(OperationRead, PhaseRead, ErrNotFound)
+		}
+		return nil, wrap(OperationRead, PhaseRead, err)
+	}
+	meta.Size = size
+	payload, err := s.objects.Get(ctx, meta)
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return nil, wrap(OperationRead, PhaseRead, err)
+		}
+		return nil, wrap(OperationRead, PhaseEvidence, err)
+	}
+	sum := sha256.Sum256(payload)
+	if int64(len(payload)) != size || hex.EncodeToString(sum[:]) != meta.Digest {
+		return nil, wrap(OperationRead, PhaseEvidence, ErrEvidenceCorrupt)
+	}
+	return payload, nil
 }
 
 // QueryFindingsSummary returns severity-and-verdict buckets for the Security Posture dashboard.
