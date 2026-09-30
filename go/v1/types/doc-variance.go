@@ -1,6 +1,10 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
+
+import (
+	"github.com/traust-security/traust-sdk/go/v1/enums"
+)
 
 type DocVariance struct {
 	Metadata DocVarianceMetadata      `json:"metadata"`
@@ -17,13 +21,13 @@ type DocVarianceMetadata struct {
 type DocVarianceRecordsItem struct {
 	Claim           string                                   `json:"claim"`
 	CodeEvidence    []DocVarianceRecordsItemCodeEvidenceItem `json:"code_evidence"`
-	Disposition     string                                   `json:"disposition"`
+	Disposition     enums.DocVarianceDisposition             `json:"disposition"`
 	DispositionNote *string                                  `json:"disposition_note,omitempty"`
 	FindingRefs     []string                                 `json:"finding_refs,omitempty"`
 	Id              string                                   `json:"id"`
 	Source          DocVarianceRecordsItemSource             `json:"source"`
 	ThreatRefs      []string                                 `json:"threat_refs,omitempty"`
-	Variance        *string                                  `json:"variance,omitempty"`
+	Variance        *enums.DocVarianceKind                   `json:"variance,omitempty"`
 	VerifiedAgainst *string                                  `json:"verified_against,omitempty"`
 	VerifiedAt      string                                   `json:"verified_at"`
 }

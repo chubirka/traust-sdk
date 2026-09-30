@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -16,9 +16,9 @@ type IsolationReview struct {
 }
 
 type Dimension struct {
-	Evidence  []string `json:"evidence,omitempty"`
-	Rationale *string  `json:"rationale,omitempty"`
-	Result    string   `json:"result"`
+	Evidence  []string                   `json:"evidence,omitempty"`
+	Rationale *string                    `json:"rationale,omitempty"`
+	Result    enums.IsolationCheckResult `json:"result"`
 }
 
 type Gap struct {
@@ -29,14 +29,14 @@ type Gap struct {
 }
 
 type Interface struct {
-	Complexity     enums.Severity      `json:"complexity"`
-	Dimensions     InterfaceDimensions `json:"dimensions"`
-	Exposure       string              `json:"exposure"`
-	Id             string              `json:"id"`
-	Kind           string              `json:"kind"`
-	Name           string              `json:"name"`
-	Repos          []string            `json:"repos,omitempty"`
-	SharedInstance interface{}         `json:"shared_instance,omitempty"`
+	Complexity     enums.InterfaceComplexity `json:"complexity"`
+	Dimensions     InterfaceDimensions       `json:"dimensions"`
+	Exposure       enums.InterfaceExposure   `json:"exposure"`
+	Id             string                    `json:"id"`
+	Kind           enums.InterfaceKind       `json:"kind"`
+	Name           string                    `json:"name"`
+	Repos          []string                  `json:"repos,omitempty"`
+	SharedInstance interface{}               `json:"shared_instance,omitempty"`
 }
 
 type InterfaceDimensions struct {
@@ -57,8 +57,8 @@ type IsolationReviewMetadata struct {
 }
 
 type IsolationReviewPosture struct {
-	DimensionRollup    map[string]int `json:"dimension_rollup,omitempty"`
-	InterfacesReviewed *int           `json:"interfaces_reviewed,omitempty"`
-	Overall            string         `json:"overall"`
-	Summary            string         `json:"summary"`
+	DimensionRollup    map[string]int         `json:"dimension_rollup,omitempty"`
+	InterfacesReviewed *int                   `json:"interfaces_reviewed,omitempty"`
+	Overall            enums.IsolationPosture `json:"overall"`
+	Summary            string                 `json:"summary"`
 }

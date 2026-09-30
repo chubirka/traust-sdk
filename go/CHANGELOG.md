@@ -2,6 +2,22 @@
 
 All notable changes to the Go SDK are documented here.
 
+## [0.15.0]
+
+### Changed
+
+- **Generated against traust-contracts 0.44.0** (was a pre-0.37 commit).
+  - Every registered enum is now a Go type, and matching fields are typed
+    `enums.*` instead of `string`.
+  - `refuted-register` gains Save/Get operations.
+  - The `layer_metadata` projection is gone (contracts #11); the findings
+    summary's repository now comes from subject ownership.
+- **storage/v1 no longer retains artifact bytes** (contracts #9). Save records
+  each artifact's digest and byte size, its binding, and its projections.
+  - The read-back collision check is gone, because the digest is the key.
+  - Typed `Get*` and `GetEvidence` return `ErrArtifactBytesNotRetained` until
+    a caller-supplied object store backs them.
+
 ## [0.14.2]
 
 ### Fixed

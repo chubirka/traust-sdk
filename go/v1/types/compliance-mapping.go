@@ -1,6 +1,10 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
+
+import (
+	"github.com/traust-security/traust-sdk/go/v1/enums"
+)
 
 type ComplianceMapping struct {
 	Checks   []ComplianceMappingChecksItem   `json:"checks"`
@@ -10,9 +14,9 @@ type ComplianceMapping struct {
 }
 
 type Assertion struct {
-	Expected interface{} `json:"expected,omitempty"`
-	Operator string      `json:"operator"`
-	Path     string      `json:"path"`
+	Expected interface{}                       `json:"expected,omitempty"`
+	Operator enums.ComplianceAssertionOperator `json:"operator"`
+	Path     string                            `json:"path"`
 }
 
 type ComplianceMappingChecksItem struct {
@@ -27,13 +31,13 @@ type ComplianceMappingChecksItem struct {
 }
 
 type ComplianceMappingControlsItem struct {
-	Applicability   *Assertion `json:"applicability,omitempty"`
-	Checks          []string   `json:"checks,omitempty"`
-	Classification  string     `json:"classification"`
-	ControlId       string     `json:"control_id"`
-	Crosswalk       []string   `json:"crosswalk,omitempty"`
-	EvidenceRequest *string    `json:"evidence_request,omitempty"`
-	Framework       string     `json:"framework"`
-	Note            *string    `json:"note,omitempty"`
-	Parameters      []string   `json:"parameters,omitempty"`
+	Applicability   *Assertion                            `json:"applicability,omitempty"`
+	Checks          []string                              `json:"checks,omitempty"`
+	Classification  enums.ComplianceControlClassification `json:"classification"`
+	ControlId       string                                `json:"control_id"`
+	Crosswalk       []string                              `json:"crosswalk,omitempty"`
+	EvidenceRequest *string                               `json:"evidence_request,omitempty"`
+	Framework       enums.ComplianceControlCatalog        `json:"framework"`
+	Note            *string                               `json:"note,omitempty"`
+	Parameters      []string                              `json:"parameters,omitempty"`
 }

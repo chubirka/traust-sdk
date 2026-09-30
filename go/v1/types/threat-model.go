@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -23,47 +23,47 @@ type ThreatModel struct {
 }
 
 type Mitigation struct {
-	ClosesClass string   `json:"closes_class"`
-	Effort      string   `json:"effort"`
-	Mitigation  string   `json:"mitigation"`
-	ThreatIds   []string `json:"threat_ids"`
+	ClosesClass enums.MitigationClosesClass `json:"closes_class"`
+	Effort      enums.MitigationEffort      `json:"effort"`
+	Mitigation  string                      `json:"mitigation"`
+	ThreatIds   []string                    `json:"threat_ids"`
 }
 
 type Provenance struct {
-	Date           string  `json:"date"`
-	HarnessVersion *string `json:"harness_version,omitempty"`
-	Inputs         *string `json:"inputs,omitempty"`
-	Mode           string  `json:"mode"`
-	Owner          *string `json:"owner,omitempty"`
-	Target         string  `json:"target"`
+	Date           string                `json:"date"`
+	HarnessVersion *string               `json:"harness_version,omitempty"`
+	Inputs         *string               `json:"inputs,omitempty"`
+	Mode           enums.ThreatModelMode `json:"mode"`
+	Owner          *string               `json:"owner,omitempty"`
+	Target         string                `json:"target"`
 }
 
 type TenantBoundary struct {
-	Authentication     *string         `json:"authentication,omitempty"`
-	BoundaryId         string          `json:"boundary_id"`
-	Complexity         *enums.Severity `json:"complexity,omitempty"`
-	Connectivity       *string         `json:"connectivity,omitempty"`
-	Encryption         *string         `json:"encryption,omitempty"`
-	Exposure           string          `json:"exposure"`
-	Hygiene            *string         `json:"hygiene,omitempty"`
-	Interface          string          `json:"interface"`
-	IsolationReviewRef *string         `json:"isolation_review_ref,omitempty"`
-	Kind               string          `json:"kind"`
-	Privilege          *string         `json:"privilege,omitempty"`
-	ThreatIds          []string        `json:"threat_ids,omitempty"`
+	Authentication     *string                    `json:"authentication,omitempty"`
+	BoundaryId         string                     `json:"boundary_id"`
+	Complexity         *enums.InterfaceComplexity `json:"complexity,omitempty"`
+	Connectivity       *string                    `json:"connectivity,omitempty"`
+	Encryption         *string                    `json:"encryption,omitempty"`
+	Exposure           enums.InterfaceExposure    `json:"exposure"`
+	Hygiene            *string                    `json:"hygiene,omitempty"`
+	Interface          string                     `json:"interface"`
+	IsolationReviewRef *string                    `json:"isolation_review_ref,omitempty"`
+	Kind               enums.InterfaceKind        `json:"kind"`
+	Privilege          *string                    `json:"privilege,omitempty"`
+	ThreatIds          []string                   `json:"threat_ids,omitempty"`
 }
 
 type Threat struct {
-	Actor               []string               `json:"actor"`
-	Asset               *string                `json:"asset,omitempty"`
-	AttackRefs          []string               `json:"attack_refs,omitempty"`
-	Controls            *string                `json:"controls,omitempty"`
-	Evidence            []string               `json:"evidence,omitempty"`
-	Id                  string                 `json:"id"`
-	Impact              enums.ThreatImpact     `json:"impact"`
-	IsolationDimensions []string               `json:"isolation_dimensions,omitempty"`
-	Likelihood          enums.ThreatLikelihood `json:"likelihood"`
-	Status              enums.ThreatStatus     `json:"status"`
-	Surface             *string                `json:"surface,omitempty"`
-	Threat              string                 `json:"threat"`
+	Actor               []enums.ThreatActor        `json:"actor"`
+	Asset               *string                    `json:"asset,omitempty"`
+	AttackRefs          []string                   `json:"attack_refs,omitempty"`
+	Controls            *string                    `json:"controls,omitempty"`
+	Evidence            []string                   `json:"evidence,omitempty"`
+	Id                  string                     `json:"id"`
+	Impact              enums.ThreatImpact         `json:"impact"`
+	IsolationDimensions []enums.IsolationDimension `json:"isolation_dimensions,omitempty"`
+	Likelihood          enums.ThreatLikelihood     `json:"likelihood"`
+	Status              enums.ThreatStatus         `json:"status"`
+	Surface             *string                    `json:"surface,omitempty"`
+	Threat              string                     `json:"threat"`
 }

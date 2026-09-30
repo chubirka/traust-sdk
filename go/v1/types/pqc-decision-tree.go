@@ -1,6 +1,10 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
+
+import (
+	"github.com/traust-security/traust-sdk/go/v1/enums"
+)
 
 type PqcDecisionTree struct {
 	FipsInteraction      PqcDecisionTreeFipsInteraction      `json:"fips_interaction"`
@@ -21,9 +25,9 @@ type PqcDecisionTreeFipsInteraction struct {
 }
 
 type PqcDecisionTreeFipsInteractionRulesItem struct {
-	TreatAs *string `json:"treat_as,omitempty"`
-	Verdict string  `json:"verdict"`
-	When    string  `json:"when"`
+	TreatAs *string                  `json:"treat_as,omitempty"`
+	Verdict enums.PqcFipsInteraction `json:"verdict"`
+	When    string                   `json:"when"`
 }
 
 type PqcDecisionTreePqcClassificationMap struct {
@@ -36,8 +40,8 @@ type PqcDecisionTreeProvenanceTree struct {
 }
 
 type PqcDecisionTreeProvenanceTreeRulesItem struct {
-	Provenance string `json:"provenance"`
-	When       string `json:"when"`
+	Provenance enums.PqcProvenance `json:"provenance"`
+	When       string              `json:"when"`
 }
 
 type PqcDecisionTreeReadinessBuckets struct {
@@ -49,8 +53,8 @@ type PqcDecisionTreeReadinessBuckets struct {
 }
 
 type PqcDecisionTreeReadinessBucketsRulesItem struct {
-	Bucket string `json:"bucket"`
-	When   string `json:"when"`
+	Bucket enums.PqcReadinessBucket `json:"bucket"`
+	When   string                   `json:"when"`
 }
 
 type PqcDecisionTreeRemediationEffort struct {
@@ -60,8 +64,8 @@ type PqcDecisionTreeRemediationEffort struct {
 }
 
 type PqcDecisionTreeRemediationEffortRulesItem struct {
-	Effort string `json:"effort"`
-	When   string `json:"when"`
+	Effort enums.RemediationEffort `json:"effort"`
+	When   string                  `json:"when"`
 }
 
 type PqcDecisionTreeServerSideCaveat struct {
@@ -70,16 +74,16 @@ type PqcDecisionTreeServerSideCaveat struct {
 }
 
 type PqcDecisionTreeServerSideCaveatRulesItem struct {
-	Comment        *string `json:"_comment,omitempty"`
-	Caveat         string  `json:"caveat"`
-	ScoringCeiling *string `json:"scoring_ceiling,omitempty"`
-	TreatAs        *string `json:"treat_as,omitempty"`
-	When           string  `json:"when"`
+	Comment        *string                  `json:"_comment,omitempty"`
+	Caveat         string                   `json:"caveat"`
+	ScoringCeiling *enums.PqcScoringCeiling `json:"scoring_ceiling,omitempty"`
+	TreatAs        *string                  `json:"treat_as,omitempty"`
+	When           string                   `json:"when"`
 }
 
 type PqcDecisionTreeTlsControlCrosswalk struct {
-	Comment          *string  `json:"_comment,omitempty"`
-	AppControlled    []string `json:"app-controlled"`
-	InfraControlled  []string `json:"infra-controlled"`
-	VendorControlled []string `json:"vendor-controlled"`
+	Comment          *string               `json:"_comment,omitempty"`
+	AppControlled    []enums.PqcProvenance `json:"app-controlled"`
+	InfraControlled  []enums.PqcProvenance `json:"infra-controlled"`
+	VendorControlled []enums.PqcProvenance `json:"vendor-controlled"`
 }

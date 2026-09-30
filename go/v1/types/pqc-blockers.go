@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.33.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
 
 package types
 
@@ -18,17 +18,17 @@ type PqcBlockers struct {
 }
 
 type Finding struct {
-	Category          interface{}            `json:"category"`
-	Cwes              []string               `json:"cwes"`
-	Description       string                 `json:"description"`
-	Id                string                 `json:"id"`
-	Locations         []FindingLocationsItem `json:"locations"`
-	PqcClassification string                 `json:"pqc_classification"`
-	Remediation       string                 `json:"remediation"`
-	RemediationEffort *string                `json:"remediation_effort,omitempty"`
-	Severity          enums.Severity         `json:"severity"`
-	Title             string                 `json:"title"`
-	ValidationStatus  interface{}            `json:"validation_status"`
+	Category          interface{}              `json:"category"`
+	Cwes              []string                 `json:"cwes"`
+	Description       string                   `json:"description"`
+	Id                string                   `json:"id"`
+	Locations         []FindingLocationsItem   `json:"locations"`
+	PqcClassification enums.PqcClassification  `json:"pqc_classification"`
+	Remediation       string                   `json:"remediation"`
+	RemediationEffort *enums.RemediationEffort `json:"remediation_effort,omitempty"`
+	Severity          enums.Severity           `json:"severity"`
+	Title             string                   `json:"title"`
+	ValidationStatus  interface{}              `json:"validation_status"`
 }
 
 type FindingLocationsItem struct {

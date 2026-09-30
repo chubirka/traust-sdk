@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -87,9 +88,8 @@ func TestPostgresBindingProtocol(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	stored, err := client.GetVulnFindings(ctx, result.BindingID)
-	if err != nil || !bytes.Equal(stored.Payload(), payload) {
-		t.Fatalf("exact read: %v", err)
+	if _, err := client.GetVulnFindings(ctx, result.BindingID); !errors.Is(err, ErrArtifactBytesNotRetained) {
+		t.Fatalf("typed read = %v, want ErrArtifactBytesNotRetained", err)
 	}
 	again, err := client.SaveVulnFindings(ctx, SaveVulnFindingsInput{
 		Binding: binding, Artifact: artifact,
@@ -175,9 +175,14 @@ func TestPostgresFindingsSummaryUsesSameRunAndJSONScope(t *testing.T) {
 	if _, err := client.SaveTriage(ctx, SaveTriageInput{Binding: binding, Artifact: triage}); err != nil {
 		t.Fatal(err)
 	}
-	layer := mustParseArtifact(t, samples["layer"], types.ParseLayerArtifact)
-	if _, err := client.SaveLayer(ctx, SaveLayerInput{
-		Binding: Binding{ScopeID: "go-storage-test", LayerID: &layerID}, Artifact: layer,
+	// Since contracts 0.37 the display repository comes from subject
+	// ownership (ownership_current.repo_url), not from layer metadata.
+	ownershipPayload := replaceJSONField(t, samples["corpus-registry"], func(document map[string]any) {
+		document["subjects"].([]any)[0].(map[string]any)["subject_id"] = *binding.SubjectID
+	})
+	ownership := mustParseArtifact(t, ownershipPayload, types.ParseCorpusRegistryArtifact)
+	if _, err := client.SaveCorpusRegistry(ctx, SaveCorpusRegistryInput{
+		Binding: Binding{ScopeID: "go-storage-test"}, Artifact: ownership,
 	}); err != nil {
 		t.Fatal(err)
 	}
