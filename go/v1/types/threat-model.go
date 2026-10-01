@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.44.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.46.0. DO NOT EDIT.
 
 package types
 
@@ -27,6 +27,53 @@ type Mitigation struct {
 	Effort      enums.MitigationEffort      `json:"effort"`
 	Mitigation  string                      `json:"mitigation"`
 	ThreatIds   []string                    `json:"threat_ids"`
+}
+
+type OwaspRiskRating struct {
+	Impact     OwaspRiskRatingImpact     `json:"impact"`
+	Likelihood OwaspRiskRatingLikelihood `json:"likelihood"`
+	Method     interface{}               `json:"method"`
+	Rationale  map[string]string         `json:"rationale,omitempty"`
+	Severity   enums.RiskRatingBand      `json:"severity"`
+}
+
+type OwaspRiskRatingImpact struct {
+	Basis     enums.OwaspImpactBasis         `json:"basis"`
+	Business  *OwaspRiskRatingImpactBusiness `json:"business,omitempty"`
+	Level     enums.InterfaceComplexity      `json:"level"`
+	Score     float64                        `json:"score"`
+	Technical OwaspRiskRatingImpactTechnical `json:"technical"`
+}
+
+type OwaspRiskRatingImpactBusiness struct {
+	Financial     int `json:"financial"`
+	NonCompliance int `json:"non_compliance"`
+	Privacy       int `json:"privacy"`
+	Reputation    int `json:"reputation"`
+}
+
+type OwaspRiskRatingImpactTechnical struct {
+	Accountability  int `json:"accountability"`
+	Availability    int `json:"availability"`
+	Confidentiality int `json:"confidentiality"`
+	Integrity       int `json:"integrity"`
+}
+
+type OwaspRiskRatingLikelihood struct {
+	Factors OwaspRiskRatingLikelihoodFactors `json:"factors"`
+	Level   enums.InterfaceComplexity        `json:"level"`
+	Score   float64                          `json:"score"`
+}
+
+type OwaspRiskRatingLikelihoodFactors struct {
+	Awareness          int `json:"awareness"`
+	EaseOfDiscovery    int `json:"ease_of_discovery"`
+	EaseOfExploit      int `json:"ease_of_exploit"`
+	IntrusionDetection int `json:"intrusion_detection"`
+	Motive             int `json:"motive"`
+	Opportunity        int `json:"opportunity"`
+	PopulationSize     int `json:"population_size"`
+	SkillLevel         int `json:"skill_level"`
 }
 
 type Provenance struct {
@@ -60,9 +107,10 @@ type Threat struct {
 	Controls            *string                    `json:"controls,omitempty"`
 	Evidence            []string                   `json:"evidence,omitempty"`
 	Id                  string                     `json:"id"`
-	Impact              enums.ThreatImpact         `json:"impact"`
+	Impact              *enums.ThreatImpact        `json:"impact,omitempty"`
 	IsolationDimensions []enums.IsolationDimension `json:"isolation_dimensions,omitempty"`
-	Likelihood          enums.ThreatLikelihood     `json:"likelihood"`
+	Likelihood          *enums.ThreatLikelihood    `json:"likelihood,omitempty"`
+	RiskRating          *OwaspRiskRating           `json:"risk_rating,omitempty"`
 	Status              enums.ThreatStatus         `json:"status"`
 	Surface             *string                    `json:"surface,omitempty"`
 	Threat              string                     `json:"threat"`

@@ -297,6 +297,44 @@ func threatScore(impact, likelihood string) *int64 {
 	return &product
 }
 
+// threatRating holds an OWASP risk rating's threat columns: the whole block
+// (factors and reasons are part of the contract) and its derived values,
+// typed so a view can filter and order on them. All nil when unrated.
+type threatRating struct {
+	riskRating      *string
+	severity        *string
+	likelihoodScore *float64
+	likelihoodLevel *string
+	impactScore     *float64
+	impactLevel     *string
+	impactBasis     *string
+}
+
+func threatRatingColumns(rating *types.OwaspRiskRating) (threatRating, error) {
+	if rating == nil {
+		return threatRating{}, nil
+	}
+	block, err := optionalProjectionJSON(rating)
+	if err != nil {
+		return threatRating{}, err
+	}
+	severity := string(rating.Severity)
+	likelihoodScore := rating.Likelihood.Score
+	likelihoodLevel := string(rating.Likelihood.Level)
+	impactScore := rating.Impact.Score
+	impactLevel := string(rating.Impact.Level)
+	impactBasis := string(rating.Impact.Basis)
+	return threatRating{
+		riskRating:      block,
+		severity:        &severity,
+		likelihoodScore: &likelihoodScore,
+		likelihoodLevel: &likelihoodLevel,
+		impactScore:     &impactScore,
+		impactLevel:     &impactLevel,
+		impactBasis:     &impactBasis,
+	}, nil
+}
+
 // projectThreatModel fans a model out to one `threat` row per threat.
 // Hand-written for the same reason projectCorpusRegistry is: the generator's
 // one-row projector maps ROOT schema properties to columns, and these live
@@ -352,8 +390,26 @@ func (s *sqlStore) projectThreatModel(
 		if err != nil {
 			return projectionError(projectionThreat, projectionFieldAttackRefs, err)
 		}
-		impact := string(threat.Impact)
-		likelihood := string(threat.Likelihood)
+		// Legacy labels: present only on a threat not yet re-rated with the
+		// OWASP Risk Rating Methodology. The legacy score orders those
+		// threats; a rated one orders by severity and has no score.
+		var impact, likelihood *string
+		if threat.Impact != nil {
+			value := string(*threat.Impact)
+			impact = &value
+		}
+		if threat.Likelihood != nil {
+			value := string(*threat.Likelihood)
+			likelihood = &value
+		}
+		var score *int64
+		if threat.RiskRating == nil && impact != nil && likelihood != nil {
+			score = threatScore(*impact, *likelihood)
+		}
+		rating, err := threatRatingColumns(threat.RiskRating)
+		if err != nil {
+			return projectionError(projectionThreat, projectionFieldRow, err)
+		}
 		status := string(threat.Status)
 		statement := threat.Threat
 		linddun := int64(0)
@@ -361,25 +417,32 @@ func (s *sqlStore) projectThreatModel(
 			linddun = 1
 		}
 		if err := s.queries.threatUpsert(ctx, conn, threatUpsertParams{
-			bindingId:      state.bindingID,
-			artifactDigest: state.digest,
-			threatKey:      keyPrefix + ":" + threat.Id,
-			threatId:       threat.Id,
-			model:          modelName,
-			subjectId:      subjectID,
-			product:        &product,
-			statement:      &statement,
-			surface:        threat.Surface,
-			asset:          threat.Asset,
-			impact:         &impact,
-			likelihood:     &likelihood,
-			status:         &status,
-			controls:       threat.Controls,
-			actors:         actors,
-			evidence:       evidence,
-			linddun:        &linddun,
-			score:          threatScore(impact, likelihood),
-			attackRefs:     attackRefs,
+			bindingId:       state.bindingID,
+			artifactDigest:  state.digest,
+			threatKey:       keyPrefix + ":" + threat.Id,
+			threatId:        threat.Id,
+			model:           modelName,
+			subjectId:       subjectID,
+			product:         &product,
+			statement:       &statement,
+			surface:         threat.Surface,
+			asset:           threat.Asset,
+			impact:          impact,
+			likelihood:      likelihood,
+			riskRating:      rating.riskRating,
+			severity:        rating.severity,
+			likelihoodScore: rating.likelihoodScore,
+			likelihoodLevel: rating.likelihoodLevel,
+			impactScore:     rating.impactScore,
+			impactLevel:     rating.impactLevel,
+			impactBasis:     rating.impactBasis,
+			status:          &status,
+			controls:        threat.Controls,
+			actors:          actors,
+			evidence:        evidence,
+			linddun:         &linddun,
+			score:           score,
+			attackRefs:      attackRefs,
 			// threat-model.schema.json declares no isolation_boundaries on a
 			// threat; the column exists for the tenant-boundary work and the
 			// Python projector writes nil here too.

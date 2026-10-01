@@ -1,4 +1,4 @@
-// Code generated from traust-contracts 81106987e9543e0d8b8c0c1b3a7f8341968dbbe6 SQL queries. DO NOT EDIT.
+// Code generated from traust-contracts 847210af4a940b8d0454973bec6eff6308b658c8 SQL queries. DO NOT EDIT.
 
 package storage
 
@@ -1231,8 +1231,8 @@ func (q queries) subjectOwnershipUpsert(ctx context.Context, conn *sql.Conn, p s
 	return err
 }
 
-const threatUpsertPostgres = "INSERT INTO traust_storage.threat (\n    binding_id,\n    artifact_digest,\n    threat_key,\n    threat_id,\n    model,\n    subject_id,\n    product,\n    statement,\n    surface,\n    asset,\n    impact,\n    likelihood,\n    status,\n    controls,\n    actors,\n    evidence,\n    linddun,\n    score,\n    attack_refs,\n    isolation_dimensions,\n    isolation_boundaries\n)\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21\n)\nON CONFLICT (binding_id, threat_key) DO NOTHING;"
-const threatUpsertSQLite = "INSERT INTO threat (\n    binding_id,\n    artifact_digest,\n    threat_key,\n    threat_id,\n    model,\n    subject_id,\n    product,\n    statement,\n    surface,\n    asset,\n    impact,\n    likelihood,\n    status,\n    controls,\n    actors,\n    evidence,\n    linddun,\n    score,\n    attack_refs,\n    isolation_dimensions,\n    isolation_boundaries\n)\nVALUES (\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?\n)\nON CONFLICT (binding_id, threat_key) DO NOTHING;"
+const threatUpsertPostgres = "INSERT INTO traust_storage.threat (\n    binding_id,\n    artifact_digest,\n    threat_key,\n    threat_id,\n    model,\n    subject_id,\n    product,\n    statement,\n    surface,\n    asset,\n    impact,\n    likelihood,\n    risk_rating,\n    severity,\n    likelihood_score,\n    likelihood_level,\n    impact_score,\n    impact_level,\n    impact_basis,\n    status,\n    controls,\n    actors,\n    evidence,\n    linddun,\n    score,\n    attack_refs,\n    isolation_dimensions,\n    isolation_boundaries\n)\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26,\n    $27,\n    $28\n)\nON CONFLICT (binding_id, threat_key) DO NOTHING;"
+const threatUpsertSQLite = "INSERT INTO threat (\n    binding_id,\n    artifact_digest,\n    threat_key,\n    threat_id,\n    model,\n    subject_id,\n    product,\n    statement,\n    surface,\n    asset,\n    impact,\n    likelihood,\n    risk_rating,\n    severity,\n    likelihood_score,\n    likelihood_level,\n    impact_score,\n    impact_level,\n    impact_basis,\n    status,\n    controls,\n    actors,\n    evidence,\n    linddun,\n    score,\n    attack_refs,\n    isolation_dimensions,\n    isolation_boundaries\n)\nVALUES (\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?\n)\nON CONFLICT (binding_id, threat_key) DO NOTHING;"
 
 type threatUpsertParams struct {
 	bindingId           string
@@ -1247,6 +1247,13 @@ type threatUpsertParams struct {
 	asset               *string
 	impact              *string
 	likelihood          *string
+	riskRating          *string
+	severity            *string
+	likelihoodScore     *float64
+	likelihoodLevel     *string
+	impactScore         *float64
+	impactLevel         *string
+	impactBasis         *string
 	status              *string
 	controls            *string
 	actors              *string
@@ -1263,12 +1270,12 @@ func (q queries) threatUpsert(ctx context.Context, conn *sql.Conn, p threatUpser
 	if q.dialect == dialectPostgres {
 		statement = threatUpsertPostgres
 	}
-	_, err := conn.ExecContext(ctx, statement, p.bindingId, p.artifactDigest, p.threatKey, p.threatId, p.model, p.subjectId, p.product, p.statement, p.surface, p.asset, p.impact, p.likelihood, p.status, p.controls, p.actors, p.evidence, p.linddun, p.score, p.attackRefs, p.isolationDimensions, p.isolationBoundaries)
+	_, err := conn.ExecContext(ctx, statement, p.bindingId, p.artifactDigest, p.threatKey, p.threatId, p.model, p.subjectId, p.product, p.statement, p.surface, p.asset, p.impact, p.likelihood, p.riskRating, p.severity, p.likelihoodScore, p.likelihoodLevel, p.impactScore, p.impactLevel, p.impactBasis, p.status, p.controls, p.actors, p.evidence, p.linddun, p.score, p.attackRefs, p.isolationDimensions, p.isolationBoundaries)
 	return err
 }
 
-const threatCurrentListPostgres = "SELECT scope_id,\n       threat_key,\n       threat_id,\n       model,\n       subject_id,\n       product,\n       statement,\n       surface,\n       asset,\n       impact,\n       likelihood,\n       status,\n       controls,\n       evidence,\n       attack_refs,\n       linddun,\n       score,\n       isolation_dimensions,\n       isolation_boundaries,\n       ownership,\n       business_unit,\n       tree,\n       is_branch_audit\nFROM traust_storage.threat_current\nWHERE scope_id IN (\n    SELECT jsonb_array_elements_text($1::jsonb)\n)\nORDER BY scope_id, threat_key;"
-const threatCurrentListSQLite = "SELECT scope_id,\n       threat_key,\n       threat_id,\n       model,\n       subject_id,\n       product,\n       statement,\n       surface,\n       asset,\n       impact,\n       likelihood,\n       status,\n       controls,\n       evidence,\n       attack_refs,\n       linddun,\n       score,\n       isolation_dimensions,\n       isolation_boundaries,\n       ownership,\n       business_unit,\n       tree,\n       is_branch_audit\nFROM threat_current\nWHERE scope_id IN (SELECT value FROM json_each(?))\nORDER BY scope_id, threat_key;"
+const threatCurrentListPostgres = "SELECT scope_id,\n       threat_key,\n       threat_id,\n       model,\n       subject_id,\n       product,\n       statement,\n       surface,\n       asset,\n       impact,\n       likelihood,\n       status,\n       controls,\n       evidence,\n       attack_refs,\n       linddun,\n       score,\n       isolation_dimensions,\n       isolation_boundaries,\n       ownership,\n       business_unit,\n       tree,\n       is_branch_audit,\n       risk_rating,\n       severity,\n       likelihood_score,\n       likelihood_level,\n       impact_score,\n       impact_level,\n       impact_basis\nFROM traust_storage.threat_current\nWHERE scope_id IN (\n    SELECT jsonb_array_elements_text($1::jsonb)\n)\nORDER BY scope_id, threat_key;"
+const threatCurrentListSQLite = "SELECT scope_id,\n       threat_key,\n       threat_id,\n       model,\n       subject_id,\n       product,\n       statement,\n       surface,\n       asset,\n       impact,\n       likelihood,\n       status,\n       controls,\n       evidence,\n       attack_refs,\n       linddun,\n       score,\n       isolation_dimensions,\n       isolation_boundaries,\n       ownership,\n       business_unit,\n       tree,\n       is_branch_audit,\n       risk_rating,\n       severity,\n       likelihood_score,\n       likelihood_level,\n       impact_score,\n       impact_level,\n       impact_basis\nFROM threat_current\nWHERE scope_id IN (SELECT value FROM json_each(?))\nORDER BY scope_id, threat_key;"
 
 type threatCurrentListParams struct {
 	scopeIds string
@@ -1282,8 +1289,8 @@ func (q queries) threatCurrentList(ctx context.Context, conn *sql.Conn, p threat
 	return conn.QueryContext(ctx, statement, p.scopeIds)
 }
 
-const threatExposureListPostgres = "SELECT scope_id,\n       tree,\n       ownership,\n       business_unit,\n       product,\n       impact,\n       likelihood,\n       status,\n       evidenced,\n       linddun,\n       threats,\n       subjects,\n       top_score\nFROM traust_storage.threat_exposure\nWHERE scope_id IN (\n    SELECT jsonb_array_elements_text($1::jsonb)\n)\nORDER BY scope_id, tree, product, impact, likelihood, status;"
-const threatExposureListSQLite = "SELECT scope_id,\n       tree,\n       ownership,\n       business_unit,\n       product,\n       impact,\n       likelihood,\n       status,\n       evidenced,\n       linddun,\n       threats,\n       subjects,\n       top_score\nFROM threat_exposure\nWHERE scope_id IN (SELECT value FROM json_each(?))\nORDER BY scope_id, tree, product, impact, likelihood, status;"
+const threatExposureListPostgres = "SELECT scope_id,\n       tree,\n       ownership,\n       business_unit,\n       product,\n       impact,\n       likelihood,\n       status,\n       evidenced,\n       linddun,\n       threats,\n       subjects,\n       top_score,\n       severity\nFROM traust_storage.threat_exposure\nWHERE scope_id IN (\n    SELECT jsonb_array_elements_text($1::jsonb)\n)\nORDER BY scope_id, tree, product,\n         CASE severity\n             WHEN 'critical' THEN 0\n             WHEN 'high' THEN 1\n             WHEN 'medium' THEN 2\n             WHEN 'low' THEN 3\n             WHEN 'note' THEN 4\n             ELSE 5\n         END,\n         impact, likelihood, status;"
+const threatExposureListSQLite = "SELECT scope_id,\n       tree,\n       ownership,\n       business_unit,\n       product,\n       impact,\n       likelihood,\n       status,\n       evidenced,\n       linddun,\n       threats,\n       subjects,\n       top_score,\n       severity\nFROM threat_exposure\nWHERE scope_id IN (SELECT value FROM json_each(?))\nORDER BY scope_id, tree, product,\n         CASE severity\n             WHEN 'critical' THEN 0\n             WHEN 'high' THEN 1\n             WHEN 'medium' THEN 2\n             WHEN 'low' THEN 3\n             WHEN 'note' THEN 4\n             ELSE 5\n         END,\n         impact, likelihood, status;"
 
 type threatExposureListParams struct {
 	scopeIds string
