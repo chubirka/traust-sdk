@@ -1,6 +1,21 @@
 # traust-sdk
 
-Typed SDKs for invoking security harness skills with pluggable execution backends.
+Typed SDKs that let a consumer plug traust in without re-modeling it: storage, ledger access, skill invocation, and generated types/validation.
+
+## Purpose
+
+The SDK's primary goal is **plug-and-play consumption**. A consumer imports the SDK, points it at a database and a ledger URL, and gets traust's data model working with no tables, schemas, or identity logic of its own.
+
+Data flows left to right: **traust data → consumer extension data**.
+
+| Layer | Owns | Reference |
+|---|---|---|
+| [traust-contracts](https://github.com/traust-security/traust-contracts) | Schemas, enums, and the `traust_storage` / `traust_ledger` DDL | source of truth |
+| traust-sdk (this repo) | Typed access to that data: `storage.Init` bootstraps the contracts DDL; `ledger` wraps the ledger service; `types`/`enums`/`validate` are generated | [`go/README.md`](go/README.md) |
+| [traust-ledger](https://github.com/traust-security/traust-ledger) | Dispositions, countersign gates, finding identity/fingerprints | [docs/consumer-integration.md](https://github.com/traust-security/traust-ledger/blob/main/docs/consumer-integration.md) |
+| Consumer | Only its own extension data (whatever its domain needs), joined to traust rows by `binding_id` / `layer_id` | the consumer's own docs |
+
+Consumers are free to extend traust for their own use cases. When several consumers duplicate the same traust data or behavior, that's a sign it belongs in the SDK (or traust-contracts).
 
 ## Setup
 
@@ -22,13 +37,15 @@ Each language has its own `{lang}/VERSION` and git tag (`{tag_prefix}/vX.Y.Z` in
 ## Architecture
 
 ```
-traust-contracts        ← schemas, enums (source of truth)
+traust-contracts        ← schemas, enums, DDL (source of truth)
 traust-sdk              ← typed SDKs that consumers import (this repo)
+consumer                ← extension data only
 ```
 
-The SDK is opinionated on **contracts** (input/output shapes validated against
-schemas from `traust-contracts`) and unopinionated on **execution** (you
-implement a Provider interface to run skills however you want).
+The SDK is opinionated on **contracts** (shapes, storage DDL, and ledger API come from
+`traust-contracts` and `traust-ledger`) and unopinionated on **infrastructure**: the
+consumer supplies the database handle, the object store, the ledger URL and token,
+and a skill `Provider` for execution.
 
 ## Regenerating from contracts
 

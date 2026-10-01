@@ -1,8 +1,18 @@
 # traust-sdk (Go)
 
 ```bash
-go get github.com/traust-security/traust-sdk/go@v0.9.0
+go get github.com/traust-security/traust-sdk/go@latest
 ```
+
+Consumer setup is three handles, with no traust tables or types of your own:
+
+| Need | Package | You supply |
+|---|---|---|
+| Store and read traust artifacts | [`v1/storage`](#storage-sdk) | `*sql.DB` + `storage.ObjectStore`; `Init` bootstraps the contracts DDL in `traust_storage` |
+| Dispositions, events, countersign | [`v1/ledger`](#ledger-sdk) | ledger URL + token |
+| Run skills | [`v1/skills`](#skills-sdk) | a `skills.Provider` |
+
+Keep consumer tables for consumer data only and reference traust rows by `binding_id` / `layer_id`. Overview: [../README.md → Purpose](../README.md#purpose).
 
 ## Skills SDK
 
@@ -183,8 +193,8 @@ if err != nil {
 if err = client.Init(ctx); err != nil {
     return err
 }
-subjectID := "sci:inventory-item:" + inventoryItemID
-runID := "sci:scan-result:" + scanResultID
+subjectID := "myapp:subject:" + subjectKey
+runID := "myapp:run:" + runKey
 result, err := client.SaveVulnFindings(ctx, storage.SaveVulnFindingsInput{
     Binding: storage.Binding{
         ScopeID:   "local",
