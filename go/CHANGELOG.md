@@ -2,6 +2,16 @@
 
 All notable changes to the Go SDK are documented here.
 
+## [0.17.0]
+
+### Changed
+
+- **Generated against traust-contracts 0.47.0.** The threat model's
+  `Assets`, `EntryPoints`, `Deprioritized`, `AttackScenarios` and
+  `UpdateHistory` are typed structs (`Asset`, `EntryPoint`,
+  `DeprioritizedThreat`, `AttackScenario`, `HistoryEntry`) instead of untyped
+  objects. Asset `Sensitivity` is typed by the `chain-severity` enum.
+
 ## [0.16.0]
 
 ### Changed
