@@ -1,4 +1,4 @@
-// Code generated from traust-contracts v0.46.0. DO NOT EDIT.
+// Code generated from traust-contracts v0.47.0. DO NOT EDIT.
 
 package types
 
@@ -7,19 +7,51 @@ import (
 )
 
 type ThreatModel struct {
-	Assets           []map[string]interface{} `json:"assets,omitempty"`
-	AttackScenarios  []map[string]interface{} `json:"attack_scenarios,omitempty"`
-	Deprioritized    []map[string]interface{} `json:"deprioritized,omitempty"`
-	EntryPoints      []map[string]interface{} `json:"entry_points,omitempty"`
-	Mitigations      []Mitigation             `json:"mitigations,omitempty"`
-	OpenQuestions    []string                 `json:"open_questions,omitempty"`
-	Provenance       Provenance               `json:"provenance"`
-	SubjectId        *string                  `json:"subject_id,omitempty"`
-	System           string                   `json:"system"`
-	SystemContext    *string                  `json:"system_context,omitempty"`
-	TenantBoundaries []TenantBoundary         `json:"tenant_boundaries,omitempty"`
-	Threats          []Threat                 `json:"threats"`
-	UpdateHistory    []map[string]interface{} `json:"update_history,omitempty"`
+	Assets           []Asset               `json:"assets,omitempty"`
+	AttackScenarios  []AttackScenario      `json:"attack_scenarios,omitempty"`
+	Deprioritized    []DeprioritizedThreat `json:"deprioritized,omitempty"`
+	EntryPoints      []EntryPoint          `json:"entry_points,omitempty"`
+	Mitigations      []Mitigation          `json:"mitigations,omitempty"`
+	OpenQuestions    []string              `json:"open_questions,omitempty"`
+	Provenance       Provenance            `json:"provenance"`
+	SubjectId        *string               `json:"subject_id,omitempty"`
+	System           string                `json:"system"`
+	SystemContext    *string               `json:"system_context,omitempty"`
+	TenantBoundaries []TenantBoundary      `json:"tenant_boundaries,omitempty"`
+	Threats          []Threat              `json:"threats"`
+	UpdateHistory    []HistoryEntry        `json:"update_history,omitempty"`
+}
+
+type Asset struct {
+	Asset           string              `json:"asset"`
+	Description     string              `json:"description"`
+	ExampleRecords  *string             `json:"example_records,omitempty"`
+	RegulatoryScope *string             `json:"regulatory_scope,omitempty"`
+	Sensitivity     enums.ChainSeverity `json:"sensitivity"`
+}
+
+type AttackScenario struct {
+	Id     string   `json:"id"`
+	Steps  []string `json:"steps"`
+	Threat *string  `json:"threat,omitempty"`
+}
+
+type DeprioritizedThreat struct {
+	Reason string `json:"reason"`
+	Threat string `json:"threat"`
+}
+
+type EntryPoint struct {
+	Description     string `json:"description"`
+	EntryPoint      string `json:"entry_point"`
+	ReachableAssets string `json:"reachable_assets"`
+	TrustBoundary   string `json:"trust_boundary"`
+}
+
+type HistoryEntry struct {
+	Changes string `json:"changes"`
+	Date    string `json:"date"`
+	Reason  string `json:"reason"`
 }
 
 type Mitigation struct {
