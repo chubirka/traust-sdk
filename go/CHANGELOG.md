@@ -2,6 +2,21 @@
 
 All notable changes to the Go SDK are documented here.
 
+## [0.16.0]
+
+### Changed
+
+- **Generated against traust-contracts 0.46.0.**
+  - Threats carry the OWASP Risk Rating Methodology `RiskRating`, and the
+    legacy `Impact` and `Likelihood` are now optional pointers (contracts
+    0.45.0).
+  - The `threat` projection writes `risk_rating` and its severity, scores,
+    levels and basis. It writes the legacy labels and score only when the
+    threat has them (an OWASP-rated threat has neither), matching the Python
+    projector.
+  - `threat_current` and `threat_exposure` read the new columns (contracts
+    0.46.0).
+
 ## [0.15.0]
 
 ### Changed
