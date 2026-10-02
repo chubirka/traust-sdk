@@ -118,6 +118,71 @@ func TestConvertValidationReport(t *testing.T) {
 	}
 }
 
+func TestConvertValidationReport_SoundnessAndGrades(t *testing.T) {
+	flag := "error_signature"
+	e2, e3 := "E2", "E3"
+	impact := "403 Forbidden"
+	report := types.Validation{
+		Metadata: types.ValidationMetadata{Date: "2026-07-09", HarnessVersion: "0.200.0"},
+		ValidatedFindings: []types.ValidatedFinding{
+			// Unsound refutation: never a false_positive event.
+			{SourceId: "pkg:src/F-1", Verdict: enums.ValidationVerdictRefuted, SoundnessFlag: &flag, ObservedImpact: &impact},
+			// Flagged inconclusive: queued too, though it would otherwise emit nothing.
+			{SourceId: "pkg:src/F-2", Verdict: enums.ValidationVerdictInconclusive, SoundnessFlag: &flag},
+			// E3 confirmation: inference only, queued instead of confirming.
+			{SourceId: "pkg:src/F-3", Verdict: enums.ValidationVerdictConfirmed, EvidenceGrade: &e3},
+			// E2 confirmation: emitted, grade carried so the ledger demotes it.
+			{SourceId: "pkg:src/F-4", Verdict: enums.ValidationVerdictConfirmed, EvidenceGrade: &e2},
+			// Sound refutation: still a false_positive event (countersign-gated by the ledger).
+			{SourceId: "pkg:src/F-5", Verdict: enums.ValidationVerdictRefuted},
+			// A soundness flag never blocks a confirmation.
+			{SourceId: "pkg:src/F-6", Verdict: enums.ValidationVerdictConfirmed, SoundnessFlag: &flag},
+		},
+	}
+
+	out := ledger.ConvertValidationReport(report, "validations/v.json", "2026-07-11T12:00:00+00:00", nil)
+
+	events := map[string]map[string]interface{}{}
+	for _, e := range out.Events {
+		events[e["finding_ref"].(string)] = e
+	}
+	if len(events) != 3 {
+		t.Fatalf("expected events for F-4, F-5, F-6; got %v", events)
+	}
+	for _, ref := range []string{"pkg:src/F-1", "pkg:src/F-2", "pkg:src/F-3"} {
+		if _, ok := events[ref]; ok {
+			t.Errorf("%s must not produce an event", ref)
+		}
+	}
+	if got := events["pkg:src/F-4"]["evidence_grade"]; got != "E2" {
+		t.Errorf("F-4 evidence_grade = %v, want E2", got)
+	}
+	if _, ok := events["pkg:src/F-5"]["evidence_grade"]; ok {
+		t.Error("ungraded finding must not carry evidence_grade")
+	}
+	if got := events["pkg:src/F-5"]["disposition"].(map[string]interface{})["validity"]; got != "false_positive" {
+		t.Errorf("F-5 validity = %v, want false_positive", got)
+	}
+
+	reasons := map[string]string{}
+	for _, item := range out.NeedsReview {
+		reasons[item["suggested_finding_ref"].(string)] = item["queue_reason"].(string)
+	}
+	want := map[string]string{
+		"pkg:src/F-1": "unsound_refutation",
+		"pkg:src/F-2": "unsound_refutation",
+		"pkg:src/F-3": "weak_confirmation",
+	}
+	for ref, reason := range want {
+		if reasons[ref] != reason {
+			t.Errorf("%s queue_reason = %q, want %q", ref, reasons[ref], reason)
+		}
+	}
+	if len(reasons) != len(want) {
+		t.Errorf("unexpected needs_review items: %v", reasons)
+	}
+}
+
 func TestConvertVerificationReport(t *testing.T) {
 	report := types.Verification{
 		Metadata: types.VerificationMetadata{
