@@ -1,4 +1,4 @@
-// Code generated from traust-contracts 0.48.0. DO NOT EDIT.
+// Code generated from traust-contracts 0.48.1. DO NOT EDIT.
 
 package validate
 

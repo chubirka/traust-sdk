@@ -2,6 +2,17 @@
 
 All notable changes to the Go SDK are documented here.
 
+## [0.18.1]
+
+### Fixed
+
+- **Storage revision 2.** Generated against traust-contracts 0.48.1, and
+  `Init` now stamps and requires storage revision 2. 0.18.0 changed the
+  schema (`artifact_role`, `artifact_location`) but still accepted a
+  revision-1 database created by 0.17.x, which then failed its first read or
+  write with `no such column: artifact_role`. Such a database is now refused
+  on open with `ErrIncompatibleRevision`; recreate it.
+
 ## [0.18.0]
 
 ### Changed (breaking)
