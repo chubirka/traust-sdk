@@ -25,26 +25,32 @@ const (
 )
 
 type sqlStore struct {
-	db      *sql.DB
-	dialect dialect
-	queries queries
-	objects ObjectStore
+	db       *sql.DB
+	dialect  dialect
+	queries  queries
+	resolver Resolver
 }
 
-// NewClient binds storage to a caller-owned database pool and required object store.
-func NewClient(ctx context.Context, db *sql.DB, objects ObjectStore) (*Client, error) {
+// Option configures a Client.
+type Option func(*sqlStore)
+
+// WithResolver lets typed Get operations fetch artifact bytes from the
+// references registered at Save. Register-only callers need no resolver.
+func WithResolver(resolver Resolver) Option {
+	return func(s *sqlStore) { s.resolver = resolver }
+}
+
+// NewClient binds storage to a caller-owned database pool.
+func NewClient(ctx context.Context, db *sql.DB, opts ...Option) (*Client, error) {
 	if db == nil {
 		return nil, wrap(OperationInit, PhaseInput, ErrNilDatabase)
 	}
-	if objects == nil {
-		return nil, wrap(OperationInit, PhaseInput, ErrNilObjectStore)
+	store := &sqlStore{db: db}
+	for _, opt := range opts {
+		opt(store)
 	}
-	value := reflect.ValueOf(objects)
-	switch value.Kind() {
-	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
-		if value.IsNil() {
-			return nil, wrap(OperationInit, PhaseInput, ErrNilObjectStore)
-		}
+	if isNilInterface(store.resolver) {
+		store.resolver = nil
 	}
 	conn, err := db.Conn(ctx)
 	if err != nil {
@@ -56,7 +62,23 @@ func NewClient(ctx context.Context, db *sql.DB, objects ObjectStore) (*Client, e
 	if err != nil {
 		return nil, err
 	}
-	return &Client{store: &sqlStore{db: db, dialect: dialect, queries: queries{dialect: dialect}, objects: objects}}, nil
+	store.dialect = dialect
+	store.queries = queries{dialect: dialect}
+	return &Client{store: store}, nil
+}
+
+// isNilInterface treats a typed nil (e.g. a nil *MyResolver) as no resolver,
+// so Get fails with ErrNoResolver instead of panicking inside Fetch.
+func isNilInterface(value any) bool {
+	if value == nil {
+		return true
+	}
+	v := reflect.ValueOf(value)
+	switch v.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
+		return v.IsNil()
+	}
+	return false
 }
 
 // Init creates storage in an empty database or verifies its exact revision.

@@ -23,7 +23,7 @@ func TestLiveCorpusReadsThroughEveryNewQuery(t *testing.T) {
 	defer func() { _ = db.Close() }()
 
 	ctx := context.Background()
-	client, err := NewClient(ctx, db, newTestObjectStore())
+	client, err := NewClient(ctx, db, WithResolver(newTestResolver()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func TestLiveCorpusReadsThroughStepTenViews(t *testing.T) {
 	defer func() { _ = db.Close() }()
 
 	ctx := context.Background()
-	client, err := NewClient(ctx, db, newTestObjectStore())
+	client, err := NewClient(ctx, db, WithResolver(newTestResolver()))
 	if err != nil {
 		t.Fatal(err)
 	}

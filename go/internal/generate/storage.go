@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -314,10 +315,27 @@ func generateSQL(source, ddlOutput, queriesOutput, ref string) error {
 }
 
 func isRowQuery(name string) bool {
+	if multiRowGetQuery(name) {
+		return false
+	}
 	return strings.HasSuffix(name, ".exists.sql") || strings.HasSuffix(name, ".get.sql")
 }
 
-func isRowsQuery(name string) bool { return strings.HasSuffix(name, ".list.sql") }
+// isRowsQuery reports multi-row reads. Contracts reserve `.list.sql` for scoped
+// views, so a keyed read that can return several rows is named `.get.sql`
+// there and listed here explicitly.
+func isRowsQuery(name string) bool {
+	return strings.HasSuffix(name, ".list.sql") || multiRowGetQuery(name)
+}
+
+func multiRowGetQuery(name string) bool {
+	switch name {
+	case "artifact_location.get.sql":
+		return true
+	default:
+		return false
+	}
+}
 
 func postgresOnlyQuery(name string) bool {
 	switch name {
@@ -513,6 +531,7 @@ type storageProfilesDocument struct {
 type storageProfile struct {
 	Class      string   `json:"class"`
 	Required   []string `json:"required"`
+	Roles      []string `json:"roles"`
 	Projection string   `json:"projection"`
 }
 
@@ -548,6 +567,13 @@ func loadStorageProfiles(storageDir string, schemas map[string]*SchemaFile) (map
 			if field != "subject_id" && field != "run_id" && field != "layer_id" {
 				return nil, fmt.Errorf("storage profile %s requires unknown field %q", name, field)
 			}
+		}
+		seenRoles := map[string]bool{}
+		for _, role := range profile.Roles {
+			if role == "" || seenRoles[role] {
+				return nil, fmt.Errorf("storage profile %s has empty or duplicate role %q", name, role)
+			}
+			seenRoles[role] = true
 		}
 	}
 	for name := range document.Artifacts {
@@ -631,13 +657,13 @@ func generateOperations(
 		if profile.Projection != "" && len(tables[profile.Projection]) == 0 {
 			return fmt.Errorf("storage profile %s has no projection table %s", schema, profile.Projection)
 		}
-		fmt.Fprintf(&b, "type Save%sInput struct {\n\tBinding Binding\n\tArtifact types.Artifact[types.%s]\n}\n\n", operation, goType)
+		fmt.Fprintf(&b, "type Save%sInput struct {\n\tBinding Binding\n\tArtifact types.Artifact[types.%s]\n\t// References are where the caller already wrote these exact bytes.\n\tReferences []string\n}\n\n", operation, goType)
 		fmt.Fprintf(&b, "func (c *Client) Save%s(ctx context.Context, input Save%sInput) (SaveResult, error) {\n", operation, operation)
 		projector := "nil"
 		if profile.Projection != "" {
 			projector = "c.store.project" + operation
 		}
-		fmt.Fprintf(&b, "\treturn saveTypedArtifact(ctx, c.store, %q, input.Binding, %s, input.Artifact, %s)\n}\n\n", schema, runtimeProfileLiteral(profile), projector)
+		fmt.Fprintf(&b, "\treturn saveTypedArtifact(ctx, c.store, %q, input.Binding, input.References, %s, input.Artifact, %s)\n}\n\n", schema, runtimeProfileLiteral(profile), projector)
 		fmt.Fprintf(&b, "func (c *Client) Get%s(ctx context.Context, bindingID string) (types.Artifact[types.%s], error) {\n", operation, goType)
 		fmt.Fprintf(&b, "\treturn getTypedArtifact(ctx, c.store, %q, bindingID, types.Parse%sArtifact)\n}\n\n", schema, goType)
 		// Families whose projection FANS OUT (one row per item) rather than
@@ -694,11 +720,20 @@ func runtimeProfileLiteral(profile storageProfile) string {
 	for _, field := range profile.Required {
 		required[field] = true
 	}
+	roles := ""
+	if len(profile.Roles) > 0 {
+		quoted := make([]string, len(profile.Roles))
+		for i, role := range profile.Roles {
+			quoted[i] = strconv.Quote(role)
+		}
+		roles = fmt.Sprintf(", roles: []string{%s}", strings.Join(quoted, ", "))
+	}
 	return fmt.Sprintf(
-		"bindingRequirements{subject: %t, run: %t, layer: %t}",
+		"bindingRequirements{subject: %t, run: %t, layer: %t%s}",
 		required["subject_id"],
 		required["run_id"],
 		required["layer_id"],
+		roles,
 	)
 }
 

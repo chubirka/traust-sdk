@@ -7,7 +7,7 @@ import (
 
 var (
 	ErrNilDatabase          = errors.New("storage database is nil")
-	ErrNilObjectStore       = errors.New("storage object store is nil")
+	ErrNoResolver           = errors.New("storage resolver is not configured")
 	ErrUnsupportedDatabase  = errors.New("storage database is unsupported")
 	ErrIncompatibleDatabase = errors.New("storage database is incompatible")
 	ErrIncompatibleRevision = errors.New("storage revision requires explicit migration")
@@ -22,6 +22,8 @@ var (
 	ErrArtifactTypeMismatch = errors.New("storage artifact type mismatch")
 	ErrBindingMismatch      = errors.New("storage artifact binding context mismatch")
 	ErrEvidenceCorrupt      = errors.New("storage evidence digest mismatch")
+	ErrRoleNotAllowed       = errors.New("storage artifact role is not allowed")
+	ErrInvalidReference     = errors.New("storage artifact reference is invalid")
 )
 
 type Operation string

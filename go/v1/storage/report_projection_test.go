@@ -50,7 +50,8 @@ func checkReportProjection(t *testing.T, client *Client, db *sql.DB, prefix stri
 	ctx := context.Background()
 	payload := append(populatedReport(t), []byte(" \n")...)
 	artifact := mustParseArtifact(t, payload, types.ParseReportArtifact)
-	input := SaveReportInput{Binding: runBinding("report-test", nil), Artifact: artifact}
+	reference := resolverOf(client).Write("s3://results/report-test/report.json", payload)
+	input := SaveReportInput{Binding: runBinding("report-test", nil), Artifact: artifact, References: []string{reference}}
 	result, err := client.SaveReport(ctx, input)
 	if err != nil {
 		t.Fatal(err)
