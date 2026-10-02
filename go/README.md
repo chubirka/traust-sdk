@@ -184,8 +184,9 @@ if err != nil {
 }
 defer db.Close()
 
-// objects implements storage.ObjectStore; supply an S3, GCS, or directory
-// adapter from your application, or storagetest.MemoryStore in tests.
+// objects implements storage.ObjectStore: an adapter to the object store the
+// Traust deployment configured (its locations.analysis_results), or
+// storagetest.MemoryStore in tests. A consumer never provisions a store of its own.
 client, err := storage.NewClient(ctx, db, objects)
 if err != nil {
     return err
@@ -215,7 +216,9 @@ A nil store fails construction with `storage.ErrNilObjectStore`. Typed reads
 and `GetEvidence` verify the returned bytes against the recorded size and digest;
 missing objects return `storage.ErrNotFound`. `storage.ObjectKey(prefix, digest)`
 returns a digest-addressed path, and `storagetest.MemoryStore` supports tests
-without a bucket. Store implementations live in consumers, not in the SDK.
+without a bucket. The object store belongs to the Traust deployment: reports live
+where its `locations.analysis_results` points. The SDK ships no store, and a
+consumer such as SCI only adapts to that store; it never provisions its own.
 `SaveResult.AlreadyBound` reports only whether that binding existed; evidence-level
 deduplication remains private. Orphan cleanup must first check active bindings.
 
