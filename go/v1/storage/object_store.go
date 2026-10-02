@@ -14,7 +14,9 @@ type ObjectMeta struct {
 	ContractsVersion string
 }
 
-// ObjectStore moves exact artifact bytes by digest. Implementations belong to consumers.
+// ObjectStore moves exact artifact bytes by digest. The store itself belongs to the
+// Traust deployment (its locations.analysis_results); an implementation is an
+// adapter to it, never a store the consumer provisions.
 // Put must accept repeated writes of the same bytes; Get wraps ErrNotFound when absent.
 type ObjectStore interface {
 	Put(ctx context.Context, meta ObjectMeta, payload []byte) error

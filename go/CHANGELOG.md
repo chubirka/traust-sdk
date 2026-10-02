@@ -2,6 +2,15 @@
 
 All notable changes to the Go SDK are documented here.
 
+## [0.17.1]
+
+### Changed
+
+- Docs: the object store belongs to the Traust deployment (where its
+  `locations.analysis_results` points). The SDK ships no store, and a
+  consumer such as SCI only adapts to that store; it never provisions its own.
+  Replaces "store implementations live in consumers".
+
 ## [0.17.0]
 
 ### Changed
