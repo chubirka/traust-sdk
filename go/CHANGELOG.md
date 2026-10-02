@@ -2,6 +2,25 @@
 
 All notable changes to the Go SDK are documented here.
 
+## [0.17.2]
+
+### Fixed
+
+- **`ConvertValidationReport` honours the report's soundness and evidence
+  grades.** It mapped every `refuted` verdict to a `false_positive` event and
+  ignored `soundness_flag` and `evidence_grade`, so a refutation the
+  validation engine had marked unsound (the probe errored, enumerated no
+  subjects, or the target was never deployed) entered the countersign queue
+  as if it were sound. It now matches the Python emitter:
+  - a `refuted` or `inconclusive` finding with a `soundness_flag` queues an
+    `unsound_refutation` needs_review item and emits no event;
+  - an `E3` (inference-only) confirmation queues `weak_confirmation` instead
+    of a `confirmed` event;
+  - every emitted event carries its `evidence_grade`, which the ledger uses to
+    demote E2/E3 execution evidence below class 1.
+
+  Reports with no flags or grades convert exactly as before.
+
 ## [0.17.1]
 
 ### Changed

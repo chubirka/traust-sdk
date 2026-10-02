@@ -95,6 +95,14 @@ func ConvertTriageReport(report types.Triage, sourceRef, recordedAt string, fpIn
 
 // ConvertValidationReport maps a validation report to ledger events.
 // fpIndex maps finding_ref to the ledger-computed fingerprint.
+//
+// The report's own soundness and grade stamps are honoured, as the Python
+// emitter does: a refuted (or inconclusive) finding carrying a soundness_flag
+// rests on a probe that never soundly tested the claim, so it queues an
+// unsound_refutation item instead of becoming a false_positive event. An
+// E3 (inference-only) confirmation queues weak_confirmation instead of a
+// confirmed event. Every event carries its evidence_grade, which the ledger
+// uses to demote E2/E3 execution evidence below class 1.
 func ConvertValidationReport(report types.Validation, sourceRef, recordedAt string, fpIndex map[string]string) ConvertResult {
 	occurredAt := eventOccurredAt(report.Metadata.Date, recordedAt)
 	source := map[string]interface{}{
@@ -103,17 +111,40 @@ func ConvertValidationReport(report types.Validation, sourceRef, recordedAt stri
 	}
 
 	result := ConvertResult{
-		Events: make([]map[string]interface{}, 0),
+		Events:      make([]map[string]interface{}, 0),
+		NeedsReview: make([]map[string]interface{}, 0),
 	}
 
 	for _, finding := range report.ValidatedFindings {
-		if finding.Verdict != enums.ValidationVerdictConfirmed &&
-			finding.Verdict != enums.ValidationVerdictRefuted {
+		flag := strings.TrimSpace(ptrString(finding.SoundnessFlag))
+		gradable := finding.Verdict == enums.ValidationVerdictConfirmed ||
+			finding.Verdict == enums.ValidationVerdictRefuted
+		if !gradable && !(finding.Verdict == enums.ValidationVerdictInconclusive && flag != "") {
 			continue
 		}
 
 		ref := validationFindingRef(finding)
 		if ref == "" {
+			continue
+		}
+
+		if flag != "" && finding.Verdict != enums.ValidationVerdictConfirmed {
+			result.NeedsReview = append(result.NeedsReview, validationReviewItem(
+				sourceRef, ref, enums.LayerReviewQueueReasonUnsoundRefutation,
+				fmt.Sprintf("machine refutation blocked by the soundness gate (%s) — the probe "+
+					"never soundly tested the claim; observed: %s",
+					flag, firstNonEmpty(ptrString(finding.ObservedImpact), "(no output)")),
+			))
+			continue
+		}
+
+		grade := strings.TrimSpace(ptrString(finding.EvidenceGrade))
+		if finding.Verdict == enums.ValidationVerdictConfirmed && grade == "E3" {
+			result.NeedsReview = append(result.NeedsReview, validationReviewItem(
+				sourceRef, ref, enums.LayerReviewQueueReasonWeakConfirmation,
+				"E3 inference-only confirmation — grade the evidence or re-probe for an "+
+					"observed effect: "+firstNonEmpty(ptrString(finding.ObservedImpact), "(no output)"),
+			))
 			continue
 		}
 
@@ -131,11 +162,23 @@ func ConvertValidationReport(report types.Validation, sourceRef, recordedAt stri
 			"rationale":     buildValidationRationale(finding),
 			"evidence_refs": []string{},
 		}
+		if grade != "" {
+			event["evidence_grade"] = grade
+		}
 		stampFingerprint(event, fpIndex, ref)
 		result.Events = append(result.Events, event)
 	}
 
 	return result
+}
+
+func validationReviewItem(sourceRef, findingRef string, reason enums.LayerReviewQueueReason, quote string) map[string]interface{} {
+	return map[string]interface{}{
+		"source_ref":            sourceRef,
+		"suggested_finding_ref": findingRef,
+		"queue_reason":          string(reason),
+		"quote":                 squash(quote, rationaleCap),
+	}
 }
 
 // ConvertVerificationReport maps a verification report to ledger events.
