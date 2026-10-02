@@ -58,7 +58,7 @@ func openPostgresStorage(t *testing.T) (*Client, *sql.DB) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = db.Close() })
-	client, err := NewClient(context.Background(), db, newTestObjectStore())
+	client, err := NewClient(context.Background(), db, WithResolver(newTestResolver()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,11 +81,16 @@ func TestPostgresBindingProtocol(t *testing.T) {
 		t.Fatal(err)
 	}
 	binding := runBinding("go-storage-test", stringPointer("ledger:layer:1"))
+	reference := resolverOf(client).Write("s3://results/go-storage-test/vuln-findings.json", payload)
 	result, err := client.SaveVulnFindings(ctx, SaveVulnFindingsInput{
-		Binding: binding, Artifact: artifact,
+		Binding: binding, Artifact: artifact, References: []string{reference},
 	})
 	if err != nil {
 		t.Fatal(err)
+	}
+	record, err := client.GetBinding(ctx, result.BindingID)
+	if err != nil || record.ByteSize != int64(len(payload)) || len(record.References) != 1 || record.References[0] != reference {
+		t.Fatalf("postgres binding = %+v, %v", record, err)
 	}
 	stored, err := client.GetVulnFindings(ctx, result.BindingID)
 	if err != nil || !bytes.Equal(stored.Payload(), payload) {

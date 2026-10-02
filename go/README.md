@@ -8,7 +8,7 @@ Consumer setup is three handles, with no traust tables or types of your own:
 
 | Need | Package | You supply |
 |---|---|---|
-| Store and read traust artifacts | [`v1/storage`](#storage-sdk) | `*sql.DB` + `storage.ObjectStore`; `Init` bootstraps the contracts DDL in `traust_storage` |
+| Store and read traust artifacts | [`v1/storage`](#storage-sdk) | `*sql.DB` (+ optional `storage.Resolver` for reads); `Init` bootstraps the contracts DDL in `traust_storage` |
 | Dispositions, events, countersign | [`v1/ledger`](#ledger-sdk) | ledger URL + token |
 | Run skills | [`v1/skills`](#skills-sdk) | a `skills.Provider` |
 
@@ -184,10 +184,10 @@ if err != nil {
 }
 defer db.Close()
 
-// objects implements storage.ObjectStore: an adapter to the object store the
-// Traust deployment configured (its locations.analysis_results), or
-// storagetest.MemoryStore in tests. A consumer never provisions a store of its own.
-client, err := storage.NewClient(ctx, db, objects)
+// resolver implements storage.Resolver: it fetches bytes from the locations the
+// producer (the harness) already wrote to. Register-only loaders omit it.
+// storagetest.MemoryResolver stands in for tests.
+client, err := storage.NewClient(ctx, db, storage.WithResolver(resolver))
 if err != nil {
     return err
 }
@@ -202,25 +202,39 @@ result, err := client.SaveVulnFindings(ctx, storage.SaveVulnFindingsInput{
         SubjectID: &subjectID,
         RunID:     &runID,
     },
-    Artifact: artifact,
+    Artifact:   artifact,
+    References: []string{"s3://sci-reports/scans/42/7/report.json"},
 })
 ```
 
 Every schema has named typed save and read operations. A named save validates the
 source bytes, computes their SHA-256 digest, records globally deduplicated
 `artifact_evidence` (digest and byte size), and creates a context-specific
-`artifact_binding` and projection in one SQL transaction. The required external
-`storage.ObjectStore` stores bytes by SHA-256 digest before that transaction, so
-failed database writes can leave unreferenced objects but never dangling bindings.
-A nil store fails construction with `storage.ErrNilObjectStore`. Typed reads
-and `GetEvidence` verify the returned bytes against the recorded size and digest;
-missing objects return `storage.ErrNotFound`. `storage.ObjectKey(prefix, digest)`
-returns a digest-addressed path, and `storagetest.MemoryStore` supports tests
-without a bucket. The object store belongs to the Traust deployment: reports live
-where its `locations.analysis_results` points. The SDK ships no store, and a
-consumer such as SCI only adapts to that store; it never provisions its own.
-`SaveResult.AlreadyBound` reports only whether that binding existed; evidence-level
-deduplication remains private. Orphan cleanup must first check active bindings.
+`artifact_binding` and projection in one SQL transaction.
+
+**Storage never writes artifact bytes.** The producer that wrote them (the
+harness, into the deployment's `locations.analysis_results` or a results bucket)
+is the only writer. A save registers where they are: `References` are opaque
+strings recorded against the binding (`artifact_location`), never fetched or
+parsed at save time. A retry may add references; none is removed. A reference
+must keep resolving to these exact bytes: pin it (a digest key from
+`storage.ObjectKey(prefix, digest)`, a commit, or an object version) rather
+than pointing at a path the next rescan overwrites.
+
+Typed reads and `GetPayload(ctx, bindingID)` fetch through the configured
+`storage.Resolver`, trying references in registration order, and return the
+first bytes that match the recorded size and SHA-256. Overwritten locations
+fail with `storage.ErrEvidenceCorrupt`, missing ones with `storage.ErrNotFound`,
+and a client built without a resolver with `storage.ErrNoResolver`.
+`GetBinding` returns the role, references and `ByteSize` without fetching.
+`SaveResult.AlreadyBound` reports only whether that binding existed;
+evidence-level deduplication remains private.
+
+`Binding.Role` separates bindings that are otherwise identical, such as a
+`report` that is the `baseline` audit and one that is its `cumulative`
+findings-current restatement. Allowed roles come from the contracts profile
+(`storage.ErrRoleNotAllowed` otherwise); a role is part of the binding ID and
+must match across a supersession. Bindings without a role keep their IDs.
 
 The exact-evidence boundary is the named Save call. Callers may perform optional
 processing, such as asking Ledger to stamp finding fingerprints, before creating
@@ -238,7 +252,7 @@ subject and run IDs; layer saves require a Ledger layer ID. Identifiers are opaq
 UTF-8 strings, and omitted scope defaults to `local`.
 
 Typed reads use `BindingID` to guard the stored schema interpretation. Use
-`GetEvidence(ctx, digest)` only when raw bytes without a type claim are intended.
+`GetPayload(ctx, bindingID)` only when raw bytes without a type claim are intended.
 Scoped view reads require an explicit scope list.
 
 ## Data-only usage

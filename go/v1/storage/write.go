@@ -21,9 +21,10 @@ const (
 )
 
 type artifactWrite struct {
-	name    string
-	binding Binding
-	payload []byte
+	name       string
+	binding    Binding
+	payload    []byte
+	references []string
 }
 
 type writeState struct {
@@ -40,6 +41,7 @@ func saveTypedArtifact[T any](
 	store *sqlStore,
 	name string,
 	binding Binding,
+	references []string,
 	requirements bindingRequirements,
 	artifact types.Artifact[T],
 	project projectFunc[T],
@@ -49,6 +51,10 @@ func saveTypedArtifact[T any](
 	}
 	binding = normalizedBinding(binding)
 	if err := validateBinding(binding, requirements); err != nil {
+		return SaveResult{}, wrap(OperationSave, PhaseInput, err)
+	}
+	references, err := normalizedReferences(references)
+	if err != nil {
 		return SaveResult{}, wrap(OperationSave, PhaseInput, err)
 	}
 	payload := artifact.Payload()
@@ -61,7 +67,7 @@ func saveTypedArtifact[T any](
 	if err := decoder.Decode(&value); err != nil {
 		return SaveResult{}, wrap(OperationSave, PhaseDecode, err)
 	}
-	return store.writeArtifact(ctx, artifactWrite{name: name, binding: binding, payload: payload}, func(
+	return store.writeArtifact(ctx, artifactWrite{name: name, binding: binding, payload: payload, references: references}, func(
 		ctx context.Context,
 		conn *sql.Conn,
 		state writeState,
@@ -86,14 +92,8 @@ func (s *sqlStore) writeArtifact(
 		binding:   input.binding,
 	}
 
-	// Put before the SQL transaction: a rollback can leave an unreferenced object,
-	// but a committed binding must never point at bytes that were never written.
-	// Orphan collection must check for active bindings before removing objects.
-	meta := ObjectMeta{Digest: digest, Size: int64(len(input.payload)), ArtifactName: input.name, ContractsVersion: storageFormatVersion}
-	if err := s.objects.Put(ctx, meta, input.payload); err != nil {
-		return result, wrap(OperationSave, PhaseEvidence, err)
-	}
-
+	// Storage never writes artifact bytes: the producer already did, and the
+	// caller registers where. Save only validates, hashes, binds, and projects.
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
 		return result, wrap(OperationSave, PhaseConnect, err)
@@ -119,6 +119,9 @@ func (s *sqlStore) writeArtifact(
 		if !sameBinding(existing, input.name, state) {
 			return result, wrap(OperationSave, PhaseBinding, ErrBindingMismatch)
 		}
+		if err = s.registerLocations(ctx, conn, state.bindingID, input.references); err != nil {
+			return result, err
+		}
 		if _, err = conn.ExecContext(ctx, "COMMIT"); err != nil {
 			return result, wrap(OperationSave, PhaseCommit, err)
 		}
@@ -132,6 +135,9 @@ func (s *sqlStore) writeArtifact(
 		return result, err
 	}
 	if err = s.insertBinding(ctx, conn, input.name, state); err != nil {
+		return result, err
+	}
+	if err = s.registerLocations(ctx, conn, state.bindingID, input.references); err != nil {
 		return result, err
 	}
 	if err = project(ctx, conn, state); err != nil {
@@ -171,6 +177,11 @@ func identifyBinding(digest, name string, binding Binding) string {
 	writeOptional(binding.SubjectID)
 	writeOptional(binding.RunID)
 	writeOptional(binding.LayerID)
+	// Trailing and present-only: a binding without a role hashes exactly as it
+	// did before roles existed, so no existing binding ID moves.
+	if binding.Role != nil {
+		writeOptional(binding.Role)
+	}
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
@@ -220,6 +231,7 @@ func (s *sqlStore) insertBinding(
 		bindingId:           state.bindingID,
 		artifactDigest:      state.digest,
 		artifactName:        name,
+		artifactRole:        state.binding.Role,
 		scopeId:             state.binding.ScopeID,
 		subjectId:           state.binding.SubjectID,
 		runId:               state.binding.RunID,
@@ -252,6 +264,7 @@ func (s *sqlStore) getBinding(
 		&record.Binding.LayerID,
 		&record.Binding.SupersedesBindingID,
 		&record.BoundAt,
+		&record.Binding.Role,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return BindingRecord{}, false, nil
@@ -285,7 +298,8 @@ func (s *sqlStore) validatePredecessor(
 		predecessor.Binding.ScopeID != state.binding.ScopeID ||
 		!sameOptional(predecessor.Binding.SubjectID, state.binding.SubjectID) ||
 		!sameOptional(predecessor.Binding.RunID, state.binding.RunID) ||
-		!sameOptional(predecessor.Binding.LayerID, state.binding.LayerID) {
+		!sameOptional(predecessor.Binding.LayerID, state.binding.LayerID) ||
+		!sameOptional(predecessor.Binding.Role, state.binding.Role) {
 		return wrap(OperationSave, PhaseBinding, ErrBindingMismatch)
 	}
 	return nil
@@ -298,7 +312,24 @@ func sameBinding(record BindingRecord, name string, state writeState) bool {
 		sameOptional(record.Binding.SubjectID, state.binding.SubjectID) &&
 		sameOptional(record.Binding.RunID, state.binding.RunID) &&
 		sameOptional(record.Binding.LayerID, state.binding.LayerID) &&
-		sameOptional(record.Binding.SupersedesBindingID, state.binding.SupersedesBindingID)
+		sameOptional(record.Binding.SupersedesBindingID, state.binding.SupersedesBindingID) &&
+		sameOptional(record.Binding.Role, state.binding.Role)
+}
+
+// registerLocations records where the caller already wrote the bytes. Repeats
+// are no-ops, so a retry may add references but never removes one.
+func (s *sqlStore) registerLocations(ctx context.Context, conn *sql.Conn, bindingID string, references []string) error {
+	registeredAt := nowUTC()
+	for _, reference := range references {
+		if err := s.queries.artifactLocationUpsert(ctx, conn, artifactLocationUpsertParams{
+			bindingId:    bindingID,
+			reference:    reference,
+			registeredAt: registeredAt,
+		}); err != nil {
+			return wrap(OperationSave, PhaseBinding, err)
+		}
+	}
+	return nil
 }
 
 func sameOptional(left, right *string) bool {

@@ -21,21 +21,30 @@ type FindingsSummaryRow struct {
 	FindingCount int64
 }
 
-func (c *Client) GetEvidence(ctx context.Context, digest string) ([]byte, error) {
+// GetPayload returns the exact bytes bound by bindingID, fetched through the
+// configured Resolver from the binding's references and verified against the
+// stored digest and size.
+func (c *Client) GetPayload(ctx context.Context, bindingID string) ([]byte, error) {
 	if c == nil || c.store == nil {
 		return nil, wrap(OperationRead, PhaseInput, ErrNilDatabase)
 	}
-	if !digestPattern.MatchString(digest) {
-		return nil, wrap(OperationRead, PhaseInput, ErrNotFound)
+	if !digestPattern.MatchString(bindingID) {
+		return nil, wrap(OperationRead, PhaseInput, ErrBindingNotFound)
 	}
 	conn, err := c.store.db.Conn(ctx)
 	if err != nil {
 		return nil, wrap(OperationRead, PhaseConnect, err)
 	}
 	defer func() { _ = conn.Close() }()
-	return c.store.readEvidence(ctx, conn, ObjectMeta{Digest: digest, ContractsVersion: storageFormatVersion})
+	record, err := c.store.readBinding(ctx, conn, bindingID)
+	if err != nil {
+		return nil, err
+	}
+	return c.store.resolve(ctx, record)
 }
 
+// GetBinding returns the binding, its role, its registered references, and the
+// evidence byte size. It never fetches bytes.
 func (c *Client) GetBinding(ctx context.Context, bindingID string) (BindingRecord, error) {
 	if c == nil || c.store == nil {
 		return BindingRecord{}, wrap(OperationRead, PhaseInput, ErrNilDatabase)
@@ -48,14 +57,7 @@ func (c *Client) GetBinding(ctx context.Context, bindingID string) (BindingRecor
 		return BindingRecord{}, wrap(OperationRead, PhaseConnect, err)
 	}
 	defer func() { _ = conn.Close() }()
-	record, found, err := c.store.getBinding(ctx, conn, bindingID)
-	if err != nil {
-		return BindingRecord{}, err
-	}
-	if !found {
-		return BindingRecord{}, wrap(OperationRead, PhaseRead, ErrBindingNotFound)
-	}
-	return record, nil
+	return c.store.readBinding(ctx, conn, bindingID)
 }
 
 func getTypedArtifact[T any](
@@ -78,17 +80,14 @@ func getTypedArtifact[T any](
 	}
 	defer func() { _ = conn.Close() }()
 
-	record, found, err := store.getBinding(ctx, conn, bindingID)
+	record, err := store.readBinding(ctx, conn, bindingID)
 	if err != nil {
 		return zero, err
-	}
-	if !found {
-		return zero, wrap(OperationRead, PhaseRead, ErrBindingNotFound)
 	}
 	if record.ArtifactName != name {
 		return zero, wrap(OperationRead, PhaseRead, ErrArtifactTypeMismatch)
 	}
-	payload, err := store.readEvidence(ctx, conn, ObjectMeta{Digest: record.Digest, ArtifactName: name, ContractsVersion: storageFormatVersion})
+	payload, err := store.resolve(ctx, record)
 	if err != nil {
 		return zero, err
 	}
@@ -99,27 +98,82 @@ func getTypedArtifact[T any](
 	return artifact, nil
 }
 
-func (s *sqlStore) readEvidence(ctx context.Context, conn *sql.Conn, meta ObjectMeta) ([]byte, error) {
-	var size int64
-	if err := s.queries.artifactEvidenceSizeGet(ctx, conn, artifactEvidenceSizeGetParams{digest: meta.Digest}).Scan(&size); err != nil {
+// readBinding loads a binding with its references and evidence byte size.
+func (s *sqlStore) readBinding(ctx context.Context, conn *sql.Conn, bindingID string) (BindingRecord, error) {
+	record, found, err := s.getBinding(ctx, conn, bindingID)
+	if err != nil {
+		return BindingRecord{}, err
+	}
+	if !found {
+		return BindingRecord{}, wrap(OperationRead, PhaseRead, ErrBindingNotFound)
+	}
+	if err := s.queries.artifactEvidenceSizeGet(ctx, conn, artifactEvidenceSizeGetParams{digest: record.Digest}).Scan(&record.ByteSize); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, wrap(OperationRead, PhaseRead, ErrNotFound)
+			return BindingRecord{}, wrap(OperationRead, PhaseRead, ErrNotFound)
 		}
+		return BindingRecord{}, wrap(OperationRead, PhaseRead, err)
+	}
+	record.References, err = s.locations(ctx, conn, bindingID)
+	if err != nil {
+		return BindingRecord{}, err
+	}
+	return record, nil
+}
+
+func (s *sqlStore) locations(ctx context.Context, conn *sql.Conn, bindingID string) (references []string, err error) {
+	rows, err := s.queries.artifactLocationGet(ctx, conn, artifactLocationGetParams{bindingId: bindingID})
+	if err != nil {
 		return nil, wrap(OperationRead, PhaseRead, err)
 	}
-	meta.Size = size
-	payload, err := s.objects.Get(ctx, meta)
-	if err != nil {
-		if errors.Is(err, ErrNotFound) {
+	defer func() { err = errors.Join(err, rows.Close()) }()
+	for rows.Next() {
+		var reference string
+		if err := rows.Scan(&reference); err != nil {
 			return nil, wrap(OperationRead, PhaseRead, err)
 		}
-		return nil, wrap(OperationRead, PhaseEvidence, err)
+		references = append(references, reference)
 	}
-	sum := sha256.Sum256(payload)
-	if int64(len(payload)) != size || hex.EncodeToString(sum[:]) != meta.Digest {
+	if err := rows.Err(); err != nil {
+		return nil, wrap(OperationRead, PhaseRead, err)
+	}
+	return references, nil
+}
+
+// resolve tries each registered reference in order and returns the first
+// bytes that match the stored size and digest. Bytes that resolve but do not
+// match are never returned; if every reference fails, a mismatch is reported
+// in preference to "not found" because it means the location was overwritten.
+func (s *sqlStore) resolve(ctx context.Context, record BindingRecord) ([]byte, error) {
+	if s.resolver == nil {
+		return nil, wrap(OperationRead, PhaseInput, ErrNoResolver)
+	}
+	if len(record.References) == 0 {
+		return nil, wrap(OperationRead, PhaseRead, ErrNotFound)
+	}
+	meta := ObjectMeta{Digest: record.Digest, Size: record.ByteSize, ArtifactName: record.ArtifactName, ContractsVersion: storageFormatVersion}
+	var failures []error
+	corrupt := false
+	for _, reference := range record.References {
+		payload, err := s.resolver.Fetch(ctx, reference, meta)
+		if err != nil {
+			failures = append(failures, err)
+			continue
+		}
+		sum := sha256.Sum256(payload)
+		if int64(len(payload)) != meta.Size || hex.EncodeToString(sum[:]) != meta.Digest {
+			corrupt = true
+			continue
+		}
+		return payload, nil
+	}
+	if corrupt {
 		return nil, wrap(OperationRead, PhaseEvidence, ErrEvidenceCorrupt)
 	}
-	return payload, nil
+	cause := errors.Join(failures...)
+	if errors.Is(cause, ErrNotFound) {
+		return nil, wrap(OperationRead, PhaseRead, cause)
+	}
+	return nil, wrap(OperationRead, PhaseEvidence, cause)
 }
 
 // QueryFindingsSummary returns severity-and-verdict buckets for the Security Posture dashboard.

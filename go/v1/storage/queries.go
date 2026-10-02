@@ -1,4 +1,4 @@
-// Code generated from traust-contracts c1c22165f30287c3b83e56a1830d275a1a14bc41 SQL queries. DO NOT EDIT.
+// Code generated from traust-contracts f57bf6e1a804fdced946312c9501fc69becd41c2 SQL queries. DO NOT EDIT.
 
 package storage
 
@@ -83,8 +83,8 @@ func (q queries) artifactLock(ctx context.Context, conn *sql.Conn, p artifactLoc
 	return err
 }
 
-const artifactBindingGetPostgres = "SELECT artifact_digest,\n       artifact_name,\n       scope_id,\n       subject_id,\n       run_id,\n       layer_id,\n       supersedes_binding_id,\n       bound_at\nFROM traust_storage.artifact_binding\nWHERE binding_id = $1;"
-const artifactBindingGetSQLite = "SELECT artifact_digest,\n       artifact_name,\n       scope_id,\n       subject_id,\n       run_id,\n       layer_id,\n       supersedes_binding_id,\n       bound_at\nFROM artifact_binding\nWHERE binding_id = ?;"
+const artifactBindingGetPostgres = "SELECT artifact_digest,\n       artifact_name,\n       scope_id,\n       subject_id,\n       run_id,\n       layer_id,\n       supersedes_binding_id,\n       bound_at,\n       artifact_role\nFROM traust_storage.artifact_binding\nWHERE binding_id = $1;"
+const artifactBindingGetSQLite = "SELECT artifact_digest,\n       artifact_name,\n       scope_id,\n       subject_id,\n       run_id,\n       layer_id,\n       supersedes_binding_id,\n       bound_at,\n       artifact_role\nFROM artifact_binding\nWHERE binding_id = ?;"
 
 type artifactBindingGetParams struct {
 	bindingId string
@@ -98,13 +98,14 @@ func (q queries) artifactBindingGet(ctx context.Context, conn *sql.Conn, p artif
 	return conn.QueryRowContext(ctx, statement, p.bindingId)
 }
 
-const artifactBindingUpsertPostgres = "INSERT INTO traust_storage.artifact_binding (\n    binding_id,\n    artifact_digest,\n    artifact_name,\n    scope_id,\n    subject_id,\n    run_id,\n    layer_id,\n    supersedes_binding_id,\n    bound_at\n)\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9\n)\nON CONFLICT (binding_id) DO NOTHING;"
-const artifactBindingUpsertSQLite = "INSERT INTO artifact_binding (\n    binding_id,\n    artifact_digest,\n    artifact_name,\n    scope_id,\n    subject_id,\n    run_id,\n    layer_id,\n    supersedes_binding_id,\n    bound_at\n)\nVALUES (\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?\n)\nON CONFLICT (binding_id) DO NOTHING;"
+const artifactBindingUpsertPostgres = "INSERT INTO traust_storage.artifact_binding (\n    binding_id,\n    artifact_digest,\n    artifact_name,\n    artifact_role,\n    scope_id,\n    subject_id,\n    run_id,\n    layer_id,\n    supersedes_binding_id,\n    bound_at\n)\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10\n)\nON CONFLICT (binding_id) DO NOTHING;"
+const artifactBindingUpsertSQLite = "INSERT INTO artifact_binding (\n    binding_id,\n    artifact_digest,\n    artifact_name,\n    artifact_role,\n    scope_id,\n    subject_id,\n    run_id,\n    layer_id,\n    supersedes_binding_id,\n    bound_at\n)\nVALUES (\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?,\n    ?\n)\nON CONFLICT (binding_id) DO NOTHING;"
 
 type artifactBindingUpsertParams struct {
 	bindingId           string
 	artifactDigest      string
 	artifactName        string
+	artifactRole        *string
 	scopeId             string
 	subjectId           *string
 	runId               *string
@@ -118,7 +119,7 @@ func (q queries) artifactBindingUpsert(ctx context.Context, conn *sql.Conn, p ar
 	if q.dialect == dialectPostgres {
 		statement = artifactBindingUpsertPostgres
 	}
-	_, err := conn.ExecContext(ctx, statement, p.bindingId, p.artifactDigest, p.artifactName, p.scopeId, p.subjectId, p.runId, p.layerId, p.supersedesBindingId, p.boundAt)
+	_, err := conn.ExecContext(ctx, statement, p.bindingId, p.artifactDigest, p.artifactName, p.artifactRole, p.scopeId, p.subjectId, p.runId, p.layerId, p.supersedesBindingId, p.boundAt)
 	return err
 }
 
@@ -153,6 +154,39 @@ func (q queries) artifactEvidenceSizeGet(ctx context.Context, conn *sql.Conn, p 
 		statement = artifactEvidenceSizeGetPostgres
 	}
 	return conn.QueryRowContext(ctx, statement, p.digest)
+}
+
+const artifactLocationGetPostgres = "SELECT reference\nFROM traust_storage.artifact_location\nWHERE binding_id = $1\nORDER BY registered_at, reference;"
+const artifactLocationGetSQLite = "SELECT reference\nFROM artifact_location\nWHERE binding_id = ?\nORDER BY registered_at, reference;"
+
+type artifactLocationGetParams struct {
+	bindingId string
+}
+
+func (q queries) artifactLocationGet(ctx context.Context, conn *sql.Conn, p artifactLocationGetParams) (*sql.Rows, error) {
+	statement := artifactLocationGetSQLite
+	if q.dialect == dialectPostgres {
+		statement = artifactLocationGetPostgres
+	}
+	return conn.QueryContext(ctx, statement, p.bindingId)
+}
+
+const artifactLocationUpsertPostgres = "INSERT INTO traust_storage.artifact_location (\n    binding_id,\n    reference,\n    registered_at\n)\nVALUES (\n    $1,\n    $2,\n    $3\n)\nON CONFLICT (binding_id, reference) DO NOTHING;"
+const artifactLocationUpsertSQLite = "INSERT INTO artifact_location (\n    binding_id,\n    reference,\n    registered_at\n)\nVALUES (\n    ?,\n    ?,\n    ?\n)\nON CONFLICT (binding_id, reference) DO NOTHING;"
+
+type artifactLocationUpsertParams struct {
+	bindingId    string
+	reference    string
+	registeredAt string
+}
+
+func (q queries) artifactLocationUpsert(ctx context.Context, conn *sql.Conn, p artifactLocationUpsertParams) error {
+	statement := artifactLocationUpsertSQLite
+	if q.dialect == dialectPostgres {
+		statement = artifactLocationUpsertPostgres
+	}
+	_, err := conn.ExecContext(ctx, statement, p.bindingId, p.reference, p.registeredAt)
+	return err
 }
 
 const attackChainUpsertPostgres = "INSERT INTO traust_storage.attack_chain (\n    binding_id,\n    artifact_digest,\n    chain_id,\n    name,\n    entry_point,\n    terminal_asset,\n    mitre_attack_refs,\n    steps,\n    verdict,\n    narrative\n)\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10\n)\nON CONFLICT (binding_id, chain_id) DO NOTHING;"

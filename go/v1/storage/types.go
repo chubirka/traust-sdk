@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"regexp"
+	"slices"
 	"strings"
 	"unicode/utf8"
 )
@@ -14,6 +15,10 @@ type Binding struct {
 	RunID               *string `json:"run_id,omitempty"`
 	LayerID             *string `json:"layer_id,omitempty"`
 	SupersedesBindingID *string `json:"supersedes_binding_id,omitempty"`
+	// Role is a lifecycle role within one context, e.g. a report that is the
+	// "baseline" audit or its "cumulative" restatement. Allowed values come
+	// from the artifact's profile; it is part of the binding identity.
+	Role *string `json:"role,omitempty"`
 }
 
 type BindingRecord struct {
@@ -22,6 +27,11 @@ type BindingRecord struct {
 	ArtifactName string  `json:"artifact_name"`
 	Binding      Binding `json:"binding"`
 	BoundAt      string  `json:"bound_at"`
+	// References are the registered locations of the exact bytes, by
+	// registration time then reference.
+	References []string `json:"references,omitempty"`
+	// ByteSize is the exact length of the evidence the digest names.
+	ByteSize int64 `json:"byte_size"`
 }
 
 type SaveResult struct {
@@ -34,6 +44,7 @@ type bindingRequirements struct {
 	subject bool
 	run     bool
 	layer   bool
+	roles   []string
 }
 
 var digestPattern = regexp.MustCompile(`^[0-9a-f]{64}$`)
@@ -57,6 +68,7 @@ func validateBinding(binding Binding, requirements bindingRequirements) error {
 		binding.RunID,
 		binding.LayerID,
 		binding.SupersedesBindingID,
+		binding.Role,
 	} {
 		if value != nil && !validBindingText(*value) {
 			return ErrInvalidIdentifier
@@ -71,7 +83,27 @@ func validateBinding(binding Binding, requirements bindingRequirements) error {
 	if requirements.layer && binding.LayerID == nil {
 		return ErrLayerIDRequired
 	}
+	if binding.Role != nil && !slices.Contains(requirements.roles, *binding.Role) {
+		return ErrRoleNotAllowed
+	}
 	return nil
+}
+
+// normalizedReferences validates opaque caller references and drops repeats,
+// keeping first-seen order. References are never parsed as URIs.
+func normalizedReferences(references []string) ([]string, error) {
+	seen := make(map[string]bool, len(references))
+	out := make([]string, 0, len(references))
+	for _, reference := range references {
+		if reference == "" || !validBindingText(reference) {
+			return nil, ErrInvalidReference
+		}
+		if !seen[reference] {
+			seen[reference] = true
+			out = append(out, reference)
+		}
+	}
+	return out, nil
 }
 
 func scopeValue(ids []string) (string, error) {

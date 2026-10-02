@@ -44,7 +44,7 @@ consumer                ← extension data only
 
 The SDK is opinionated on **contracts** (shapes, storage DDL, and ledger API come from
 `traust-contracts` and `traust-ledger`) and unopinionated on **infrastructure**: the
-consumer supplies the database handle, the object store, the ledger URL and token,
+consumer supplies the database handle, a resolver for artifact bytes it already wrote, the ledger URL and token,
 and a skill `Provider` for execution.
 
 ## Regenerating from contracts

@@ -2,6 +2,35 @@
 
 All notable changes to the Go SDK are documented here.
 
+## [0.18.0]
+
+### Changed (breaking)
+
+- **Storage never writes artifact bytes.** `storage.ObjectStore{Put,Get}` is
+  replaced by `storage.Resolver{Fetch(ctx, reference, meta)}`. The producer (the
+  harness) is the only byte writer; a Save registers where the bytes already
+  are. `NewClient(ctx, db, opts...)` takes `storage.WithResolver(r)`, optional
+  for register-only loaders. Typed reads try references in order and verify
+  size and SHA-256; a client with no resolver returns `ErrNoResolver`.
+- `GetEvidence(ctx, digest)` is removed in favour of
+  `GetPayload(ctx, bindingID)`: references belong to a binding, so a digest
+  alone no longer names a location.
+- `storagetest.MemoryStore` is replaced by `storagetest.MemoryResolver`
+  (`Write` plays the producer, `Fetch` the resolver).
+- `ErrNilObjectStore` is replaced by `ErrNoResolver`.
+
+### Added
+
+- Generated against traust-contracts 0.48.0.
+- Every `Save*Input` has `References []string`, recorded in `artifact_location`;
+  a retry may add references.
+- `Binding.Role`, validated against the contracts profile (`report`:
+  `baseline`, `cumulative`; `ErrRoleNotAllowed` otherwise). Encoded trailing and
+  present-only, so bindings without a role keep their IDs; matches the Python
+  golden vector.
+- `BindingRecord.References` and `BindingRecord.ByteSize`.
+- `ErrInvalidReference` for empty or NUL references, rejected before any write.
+
 ## [0.17.2]
 
 ### Fixed

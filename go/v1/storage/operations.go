@@ -1,4 +1,4 @@
-// Code generated from traust-contracts c1c22165f30287c3b83e56a1830d275a1a14bc41. DO NOT EDIT.
+// Code generated from traust-contracts f57bf6e1a804fdced946312c9501fc69becd41c2. DO NOT EDIT.
 
 package storage
 
@@ -12,10 +12,12 @@ import (
 type SaveAdapterResultInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.AdapterResult]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveAdapterResult(ctx context.Context, input SaveAdapterResultInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "adapter-result", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectAdapterResult)
+	return saveTypedArtifact(ctx, c.store, "adapter-result", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectAdapterResult)
 }
 
 func (c *Client) GetAdapterResult(ctx context.Context, bindingID string) (types.Artifact[types.AdapterResult], error) {
@@ -57,10 +59,12 @@ func (s *sqlStore) projectAdapterResult(ctx context.Context, conn *sql.Conn, sta
 type SaveADRRegistryInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.AdrRegistry]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveADRRegistry(ctx context.Context, input SaveADRRegistryInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "adr-registry", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectADRRegistry)
+	return saveTypedArtifact(ctx, c.store, "adr-registry", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectADRRegistry)
 }
 
 func (c *Client) GetADRRegistry(ctx context.Context, bindingID string) (types.Artifact[types.AdrRegistry], error) {
@@ -87,10 +91,12 @@ func (s *sqlStore) projectADRRegistry(ctx context.Context, conn *sql.Conn, state
 type SaveAttackMappingInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.AttackMapping]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveAttackMapping(ctx context.Context, input SaveAttackMappingInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "attack-mapping", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectAttackMapping)
+	return saveTypedArtifact(ctx, c.store, "attack-mapping", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectAttackMapping)
 }
 
 func (c *Client) GetAttackMapping(ctx context.Context, bindingID string) (types.Artifact[types.AttackMapping], error) {
@@ -126,10 +132,12 @@ func (s *sqlStore) projectAttackMapping(ctx context.Context, conn *sql.Conn, sta
 type SaveBenchmarkTargetInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.BenchmarkTarget]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveBenchmarkTarget(ctx context.Context, input SaveBenchmarkTargetInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "benchmark-target", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectBenchmarkTarget)
+	return saveTypedArtifact(ctx, c.store, "benchmark-target", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectBenchmarkTarget)
 }
 
 func (c *Client) GetBenchmarkTarget(ctx context.Context, bindingID string) (types.Artifact[types.BenchmarkTarget], error) {
@@ -156,10 +164,12 @@ func (s *sqlStore) projectBenchmarkTarget(ctx context.Context, conn *sql.Conn, s
 type SaveCloudConfigAuditInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.CloudConfigAudit]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveCloudConfigAudit(ctx context.Context, input SaveCloudConfigAuditInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "cloud-config-audit", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectCloudConfigAudit)
+	return saveTypedArtifact(ctx, c.store, "cloud-config-audit", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectCloudConfigAudit)
 }
 
 func (c *Client) GetCloudConfigAudit(ctx context.Context, bindingID string) (types.Artifact[types.CloudConfigAudit], error) {
@@ -200,10 +210,12 @@ func (s *sqlStore) projectCloudConfigAudit(ctx context.Context, conn *sql.Conn, 
 type SaveCloudConfigFindingsCurrentInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.CloudConfigFindingsCurrent]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveCloudConfigFindingsCurrent(ctx context.Context, input SaveCloudConfigFindingsCurrentInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "cloud-config-findings-current", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectCloudConfigFindingsCurrent)
+	return saveTypedArtifact(ctx, c.store, "cloud-config-findings-current", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectCloudConfigFindingsCurrent)
 }
 
 func (c *Client) GetCloudConfigFindingsCurrent(ctx context.Context, bindingID string) (types.Artifact[types.CloudConfigFindingsCurrent], error) {
@@ -249,10 +261,12 @@ func (s *sqlStore) projectCloudConfigFindingsCurrent(ctx context.Context, conn *
 type SaveComplianceAssessmentInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.ComplianceAssessment]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveComplianceAssessment(ctx context.Context, input SaveComplianceAssessmentInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "compliance-assessment", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectComplianceAssessment)
+	return saveTypedArtifact(ctx, c.store, "compliance-assessment", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectComplianceAssessment)
 }
 
 func (c *Client) GetComplianceAssessment(ctx context.Context, bindingID string) (types.Artifact[types.ComplianceAssessment], error) {
@@ -287,10 +301,12 @@ func (s *sqlStore) projectComplianceAssessment(ctx context.Context, conn *sql.Co
 type SaveComplianceMappingInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.ComplianceMapping]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveComplianceMapping(ctx context.Context, input SaveComplianceMappingInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "compliance-mapping", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectComplianceMapping)
+	return saveTypedArtifact(ctx, c.store, "compliance-mapping", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectComplianceMapping)
 }
 
 func (c *Client) GetComplianceMapping(ctx context.Context, bindingID string) (types.Artifact[types.ComplianceMapping], error) {
@@ -322,10 +338,12 @@ func (s *sqlStore) projectComplianceMapping(ctx context.Context, conn *sql.Conn,
 type SaveComplianceScopeInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.ComplianceScope]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveComplianceScope(ctx context.Context, input SaveComplianceScopeInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "compliance-scope", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectComplianceScope)
+	return saveTypedArtifact(ctx, c.store, "compliance-scope", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectComplianceScope)
 }
 
 func (c *Client) GetComplianceScope(ctx context.Context, bindingID string) (types.Artifact[types.ComplianceScope], error) {
@@ -352,10 +370,12 @@ func (s *sqlStore) projectComplianceScope(ctx context.Context, conn *sql.Conn, s
 type SaveCorpusRegistryInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.CorpusRegistry]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveCorpusRegistry(ctx context.Context, input SaveCorpusRegistryInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "corpus-registry", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectCorpusRegistry)
+	return saveTypedArtifact(ctx, c.store, "corpus-registry", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectCorpusRegistry)
 }
 
 func (c *Client) GetCorpusRegistry(ctx context.Context, bindingID string) (types.Artifact[types.CorpusRegistry], error) {
@@ -365,10 +385,12 @@ func (c *Client) GetCorpusRegistry(ctx context.Context, bindingID string) (types
 type SaveDocVarianceInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.DocVariance]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveDocVariance(ctx context.Context, input SaveDocVarianceInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "doc-variance", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectDocVariance)
+	return saveTypedArtifact(ctx, c.store, "doc-variance", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectDocVariance)
 }
 
 func (c *Client) GetDocVariance(ctx context.Context, bindingID string) (types.Artifact[types.DocVariance], error) {
@@ -398,10 +420,12 @@ func (s *sqlStore) projectDocVariance(ctx context.Context, conn *sql.Conn, state
 type SaveFleetFixInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.FleetFix]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveFleetFix(ctx context.Context, input SaveFleetFixInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "fleet-fix", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectFleetFix)
+	return saveTypedArtifact(ctx, c.store, "fleet-fix", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectFleetFix)
 }
 
 func (c *Client) GetFleetFix(ctx context.Context, bindingID string) (types.Artifact[types.FleetFix], error) {
@@ -449,10 +473,12 @@ func (s *sqlStore) projectFleetFix(ctx context.Context, conn *sql.Conn, state wr
 type SaveImpactAnalysisInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.ImpactAnalysis]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveImpactAnalysis(ctx context.Context, input SaveImpactAnalysisInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "impact-analysis", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectImpactAnalysis)
+	return saveTypedArtifact(ctx, c.store, "impact-analysis", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectImpactAnalysis)
 }
 
 func (c *Client) GetImpactAnalysis(ctx context.Context, bindingID string) (types.Artifact[types.ImpactAnalysis], error) {
@@ -487,10 +513,12 @@ func (s *sqlStore) projectImpactAnalysis(ctx context.Context, conn *sql.Conn, st
 type SaveIsolationReviewInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.IsolationReview]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveIsolationReview(ctx context.Context, input SaveIsolationReviewInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "isolation-review", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectIsolationReview)
+	return saveTypedArtifact(ctx, c.store, "isolation-review", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectIsolationReview)
 }
 
 func (c *Client) GetIsolationReview(ctx context.Context, bindingID string) (types.Artifact[types.IsolationReview], error) {
@@ -532,10 +560,12 @@ func (s *sqlStore) projectIsolationReview(ctx context.Context, conn *sql.Conn, s
 type SaveLayerInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.Layer]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveLayer(ctx context.Context, input SaveLayerInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "layer", input.Binding, bindingRequirements{subject: false, run: false, layer: true}, input.Artifact, c.store.projectLayer)
+	return saveTypedArtifact(ctx, c.store, "layer", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: true}, input.Artifact, c.store.projectLayer)
 }
 
 func (c *Client) GetLayer(ctx context.Context, bindingID string) (types.Artifact[types.Layer], error) {
@@ -545,10 +575,12 @@ func (c *Client) GetLayer(ctx context.Context, bindingID string) (types.Artifact
 type SaveOperatorPrivProfileInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.OperatorPrivProfile]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveOperatorPrivProfile(ctx context.Context, input SaveOperatorPrivProfileInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "operator-priv-profile", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectOperatorPrivProfile)
+	return saveTypedArtifact(ctx, c.store, "operator-priv-profile", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectOperatorPrivProfile)
 }
 
 func (c *Client) GetOperatorPrivProfile(ctx context.Context, bindingID string) (types.Artifact[types.OperatorPrivProfile], error) {
@@ -625,10 +657,12 @@ func (s *sqlStore) projectOperatorPrivProfile(ctx context.Context, conn *sql.Con
 type SaveOrgParametersInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.OrgParameters]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveOrgParameters(ctx context.Context, input SaveOrgParametersInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "org-parameters", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectOrgParameters)
+	return saveTypedArtifact(ctx, c.store, "org-parameters", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectOrgParameters)
 }
 
 func (c *Client) GetOrgParameters(ctx context.Context, bindingID string) (types.Artifact[types.OrgParameters], error) {
@@ -657,10 +691,12 @@ func (s *sqlStore) projectOrgParameters(ctx context.Context, conn *sql.Conn, sta
 type SavePQCBlockersInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.PqcBlockers]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SavePQCBlockers(ctx context.Context, input SavePQCBlockersInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "pqc-blockers", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectPQCBlockers)
+	return saveTypedArtifact(ctx, c.store, "pqc-blockers", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectPQCBlockers)
 }
 
 func (c *Client) GetPQCBlockers(ctx context.Context, bindingID string) (types.Artifact[types.PqcBlockers], error) {
@@ -716,10 +752,12 @@ func (s *sqlStore) projectPQCBlockers(ctx context.Context, conn *sql.Conn, state
 type SavePQCDecisionTreeInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.PqcDecisionTree]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SavePQCDecisionTree(ctx context.Context, input SavePQCDecisionTreeInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "pqc-decision-tree", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectPQCDecisionTree)
+	return saveTypedArtifact(ctx, c.store, "pqc-decision-tree", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectPQCDecisionTree)
 }
 
 func (c *Client) GetPQCDecisionTree(ctx context.Context, bindingID string) (types.Artifact[types.PqcDecisionTree], error) {
@@ -777,10 +815,12 @@ func (s *sqlStore) projectPQCDecisionTree(ctx context.Context, conn *sql.Conn, s
 type SavePQCFactsInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.PqcFacts]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SavePQCFacts(ctx context.Context, input SavePQCFactsInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "pqc-facts", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectPQCFacts)
+	return saveTypedArtifact(ctx, c.store, "pqc-facts", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectPQCFacts)
 }
 
 func (c *Client) GetPQCFacts(ctx context.Context, bindingID string) (types.Artifact[types.PqcFacts], error) {
@@ -826,10 +866,12 @@ func (s *sqlStore) projectPQCFacts(ctx context.Context, conn *sql.Conn, state wr
 type SavePQCReadinessInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.PqcReadiness]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SavePQCReadiness(ctx context.Context, input SavePQCReadinessInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "pqc-readiness", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectPQCReadiness)
+	return saveTypedArtifact(ctx, c.store, "pqc-readiness", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectPQCReadiness)
 }
 
 func (c *Client) GetPQCReadiness(ctx context.Context, bindingID string) (types.Artifact[types.PqcReadiness], error) {
@@ -897,10 +939,12 @@ func (s *sqlStore) projectPQCReadiness(ctx context.Context, conn *sql.Conn, stat
 type SaveRefutedRegisterInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.RefutedRegister]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveRefutedRegister(ctx context.Context, input SaveRefutedRegisterInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "refuted-register", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectRefutedRegister)
+	return saveTypedArtifact(ctx, c.store, "refuted-register", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectRefutedRegister)
 }
 
 func (c *Client) GetRefutedRegister(ctx context.Context, bindingID string) (types.Artifact[types.RefutedRegister], error) {
@@ -932,10 +976,12 @@ func (s *sqlStore) projectRefutedRegister(ctx context.Context, conn *sql.Conn, s
 type SaveRemediationInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.Remediation]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveRemediation(ctx context.Context, input SaveRemediationInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "remediation", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectRemediation)
+	return saveTypedArtifact(ctx, c.store, "remediation", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectRemediation)
 }
 
 func (c *Client) GetRemediation(ctx context.Context, bindingID string) (types.Artifact[types.Remediation], error) {
@@ -1003,10 +1049,12 @@ func (s *sqlStore) projectRemediation(ctx context.Context, conn *sql.Conn, state
 type SaveReportInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.Report]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveReport(ctx context.Context, input SaveReportInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "report", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectReport)
+	return saveTypedArtifact(ctx, c.store, "report", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false, roles: []string{"baseline", "cumulative"}}, input.Artifact, c.store.projectReport)
 }
 
 func (c *Client) GetReport(ctx context.Context, bindingID string) (types.Artifact[types.Report], error) {
@@ -1088,10 +1136,12 @@ func (s *sqlStore) projectReport(ctx context.Context, conn *sql.Conn, state writ
 type SaveRiskRatingMethodologyInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.RiskRatingMethodology]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveRiskRatingMethodology(ctx context.Context, input SaveRiskRatingMethodologyInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "risk-rating-methodology", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectRiskRatingMethodology)
+	return saveTypedArtifact(ctx, c.store, "risk-rating-methodology", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectRiskRatingMethodology)
 }
 
 func (c *Client) GetRiskRatingMethodology(ctx context.Context, bindingID string) (types.Artifact[types.RiskRatingMethodology], error) {
@@ -1155,10 +1205,12 @@ func (s *sqlStore) projectRiskRatingMethodology(ctx context.Context, conn *sql.C
 type SaveSlaPolicyInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.SlaPolicy]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveSlaPolicy(ctx context.Context, input SaveSlaPolicyInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "sla-policy", input.Binding, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectSlaPolicy)
+	return saveTypedArtifact(ctx, c.store, "sla-policy", input.Binding, input.References, bindingRequirements{subject: false, run: false, layer: false}, input.Artifact, c.store.projectSlaPolicy)
 }
 
 func (c *Client) GetSlaPolicy(ctx context.Context, bindingID string) (types.Artifact[types.SlaPolicy], error) {
@@ -1195,10 +1247,12 @@ func (s *sqlStore) projectSlaPolicy(ctx context.Context, conn *sql.Conn, state w
 type SaveThreatModelInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.ThreatModel]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveThreatModel(ctx context.Context, input SaveThreatModelInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "threat-model", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectThreatModel)
+	return saveTypedArtifact(ctx, c.store, "threat-model", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectThreatModel)
 }
 
 func (c *Client) GetThreatModel(ctx context.Context, bindingID string) (types.Artifact[types.ThreatModel], error) {
@@ -1208,10 +1262,12 @@ func (c *Client) GetThreatModel(ctx context.Context, bindingID string) (types.Ar
 type SaveTriageInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.Triage]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveTriage(ctx context.Context, input SaveTriageInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "triage", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectTriage)
+	return saveTypedArtifact(ctx, c.store, "triage", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectTriage)
 }
 
 func (c *Client) GetTriage(ctx context.Context, bindingID string) (types.Artifact[types.Triage], error) {
@@ -1221,10 +1277,12 @@ func (c *Client) GetTriage(ctx context.Context, bindingID string) (types.Artifac
 type SaveValidationInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.Validation]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveValidation(ctx context.Context, input SaveValidationInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "validation", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectValidation)
+	return saveTypedArtifact(ctx, c.store, "validation", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectValidation)
 }
 
 func (c *Client) GetValidation(ctx context.Context, bindingID string) (types.Artifact[types.Validation], error) {
@@ -1283,10 +1341,12 @@ func (s *sqlStore) projectValidation(ctx context.Context, conn *sql.Conn, state 
 type SaveVerificationInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.Verification]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveVerification(ctx context.Context, input SaveVerificationInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "verification", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectVerification)
+	return saveTypedArtifact(ctx, c.store, "verification", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectVerification)
 }
 
 func (c *Client) GetVerification(ctx context.Context, bindingID string) (types.Artifact[types.Verification], error) {
@@ -1344,10 +1404,12 @@ func (s *sqlStore) projectVerification(ctx context.Context, conn *sql.Conn, stat
 type SaveVulnFindingsInput struct {
 	Binding  Binding
 	Artifact types.Artifact[types.VulnFindings]
+	// References are where the caller already wrote these exact bytes.
+	References []string
 }
 
 func (c *Client) SaveVulnFindings(ctx context.Context, input SaveVulnFindingsInput) (SaveResult, error) {
-	return saveTypedArtifact(ctx, c.store, "vuln-findings", input.Binding, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectVulnFindings)
+	return saveTypedArtifact(ctx, c.store, "vuln-findings", input.Binding, input.References, bindingRequirements{subject: true, run: true, layer: false}, input.Artifact, c.store.projectVulnFindings)
 }
 
 func (c *Client) GetVulnFindings(ctx context.Context, bindingID string) (types.Artifact[types.VulnFindings], error) {

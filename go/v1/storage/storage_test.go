@@ -24,7 +24,7 @@ func openTestStorage(t *testing.T) *Client {
 	}
 	db.SetMaxOpenConns(1)
 	t.Cleanup(func() { _ = db.Close() })
-	client, err := NewClient(context.Background(), db, newTestObjectStore())
+	client, err := NewClient(context.Background(), db, WithResolver(newTestResolver()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,6 +149,12 @@ func TestBindingIDGoldenVectorAndPresence(t *testing.T) {
 	if got != want {
 		t.Fatalf("binding ID = %s", got)
 	}
+	// Same vector as traust-contracts storage/v1/README.md: a role is trailing
+	// and present-only, so the unroled ID above is unchanged.
+	roled := normalizedBinding(Binding{SubjectID: stringPointer("sci:inventory-item:42"), Role: stringPointer("baseline")})
+	if got := identifyBinding(digest, "report", roled); got != "d0da85a98aa803d79ba2fed07a8f991c706f2fbb44f3692cbd3ad8662961cb0b" {
+		t.Fatalf("roled binding ID = %s", got)
+	}
 	absent := identifyBinding(digest, "triage", normalizedBinding(Binding{}))
 	presentEmpty := identifyBinding(
 		digest,
@@ -231,9 +237,11 @@ func TestSaveRecordsDigestAndBinding(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	reference := resolverOf(client).Write("s3://results/42/7/vuln-findings.json", payload)
 	result, err := client.SaveVulnFindings(ctx, SaveVulnFindingsInput{
-		Binding:  runBinding("local", nil),
-		Artifact: artifact,
+		Binding:    runBinding("local", nil),
+		Artifact:   artifact,
+		References: []string{reference},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -247,7 +255,8 @@ func TestSaveRecordsDigestAndBinding(t *testing.T) {
 		t.Fatalf("typed read = %v, want exact original bytes", err)
 	}
 	record, err := client.GetBinding(ctx, result.BindingID)
-	if err != nil || record.Digest != result.Digest || record.ArtifactName != "vuln-findings" {
+	if err != nil || record.Digest != result.Digest || record.ArtifactName != "vuln-findings" ||
+		record.ByteSize != int64(len(payload)) || len(record.References) != 1 || record.References[0] != reference {
 		t.Fatalf("binding = %+v, %v", record, err)
 	}
 }
@@ -320,8 +329,9 @@ func TestTypedReadGuardsBinding(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	reference := resolverOf(client).Write("file:///results/vuln-findings.json", payload)
 	result, err := client.SaveVulnFindings(ctx, SaveVulnFindingsInput{
-		Binding: runBinding("local", nil), Artifact: artifact,
+		Binding: runBinding("local", nil), Artifact: artifact, References: []string{reference},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -329,9 +339,9 @@ func TestTypedReadGuardsBinding(t *testing.T) {
 	if _, err := client.GetTriage(ctx, result.BindingID); !errors.Is(err, ErrArtifactTypeMismatch) {
 		t.Fatalf("type mismatch = %v", err)
 	}
-	stored, err := client.GetEvidence(ctx, result.Digest)
+	stored, err := client.GetPayload(ctx, result.BindingID)
 	if err != nil || !bytes.Equal(stored, payload) {
-		t.Fatalf("GetEvidence = %v, want exact original bytes", err)
+		t.Fatalf("GetPayload = %v, want exact original bytes", err)
 	}
 }
 
